@@ -4,7 +4,7 @@ namespace BookShop
     {
         public Form1()
         {
-            InitializeComponent();//коммент
+            InitializeComponent();//comment
         }
     }
 }
