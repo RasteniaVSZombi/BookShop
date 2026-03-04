@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BookLibrary
 {
-    internal class Book
+    public class Book
     {
         // Поля класса Book
         public string title;      // Название книги
@@ -49,7 +49,15 @@ namespace BookLibrary
         int randomValueMin = 100;       // Мин. стоимость
         int randomValueMax = 10000;     // Макс. стоимость
 
-        // Конструктор с параметрами
+        /// <summary>
+        /// Конструктор с параметрами
+        /// </summary>
+        /// <param name="title">Название книги</param>
+        /// <param name="author">Автор книги</param>
+        /// <param name="id">Уникальный идентификатор</param>
+        /// <param name="genre">Жанр книги</param>
+        /// <param name="pageCount">Количество страниц</param>
+        /// <param name="value">Стоимость книги</param>
         public Book(string title, string author, int id, string genre, int pageCount, float value)
         {
             // Инициализация каждого поля 
@@ -61,7 +69,9 @@ namespace BookLibrary
             this.value = value;
         }
 
-        // Конструктор по умолчанию
+        /// <summary>
+        /// Конструктор по умолчанию
+        /// </summary>
         public Book()
         {
             title = string.Empty;  
@@ -72,7 +82,9 @@ namespace BookLibrary
             value = 0;            
         }
 
-        // Метод случайной генерации данных книги
+        /// <summary>
+        /// Метод случайной генерации данных книги
+        /// </summary>
         public void GenerateRandom()
         {
             title = randomTitles[random.Next(randomTitles.Length)];      
@@ -80,6 +92,40 @@ namespace BookLibrary
             genre = randomGenres[random.Next(randomGenres.Length)];    
             value = random.Next(randomValueMin, randomValueMax + 1);  
             pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
+        }
+
+
+        /// <summary>
+        /// Метод для продажи книги и обновления баланса магазина
+        /// </summary>
+        public bool SellBook(Book book, Shop shop)
+        {
+            // Проверяем, что магазин не пуст
+            if (shop == null)
+            {
+                throw new ArgumentNullException(nameof(shop), "Магазин не может быть пуст!");
+            }
+
+            // Находим шкаф с книгой
+            var shelf = shop.FindShelfByGenre(this.genre);
+
+            if (shelf != null)
+            {
+                // Ищем книгу в шкафу
+                var foundBook = shelf.FindByTitle(this.title);
+
+                if (foundBook != null)
+                {
+                    // Обновляем баланс магазина
+                    shop.UpdateBalance(this.value);
+
+                    // Удаляем книгу из шкафа
+                    shelf.books.Remove(foundBook);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
