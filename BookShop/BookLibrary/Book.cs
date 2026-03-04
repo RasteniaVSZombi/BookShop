@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BookLibrary
 {
+    /// <summary>
+    /// Класс "Книга". Хранит данные книги и возможности работать с ней
+    /// </summary>
     public class Book
     {
         // Поля класса Book

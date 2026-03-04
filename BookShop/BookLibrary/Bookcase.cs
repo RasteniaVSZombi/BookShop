@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace BookLibrary
 {
-
     /// <summary>
     /// Класс "Книжный шкаф". Хранит книги и имеет ограниченную вместимость.
     /// </summary>
