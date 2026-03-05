@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,27 +50,6 @@ namespace BookLibrary
         }
 
         /// <summary>
-        /// Добавить новый шкаф в магазин
-        /// </summary>
-        /// <param name="shelf">Шкаф для добавления</param>
-        /// <returns>true, если шкаф добавлен успешно</returns>
-        public bool AddShelf(Bookcase shelf)
-        {
-            if (_shelves.Count >= _maxShelves)
-            {
-                throw new InvalidOperationException("Превышено максимальное количество шкафов в магазине");
-            }
-
-            if (shelf == null)
-            {
-                throw new ArgumentNullException(nameof(shelf));
-            }
-
-            _shelves.Add(shelf);
-            return true;
-        }
-
-        /// <summary>
         /// Найти шкаф по жанру
         /// </summary>
         /// <param name="genre">Жанр для поиска</param>
@@ -108,31 +88,57 @@ namespace BookLibrary
         }
 
         /// <summary>
-        /// Очистить все шкафы в магазине
+        /// Получить все книги в виде строковых представлений
         /// </summary>
-        public void ClearAllShelves()
+        /// <returns>Список строк с информацией о книгах в формате «Автор — Название (Жанр)»</returns>
+        public List<string> GetAllBooksAsString()
         {
-            _shelves.Clear();
+            var allBooks = new List<string>();
+            foreach (var shelf in _shelves)
+            {
+                var booksInShelf = shelf.GetBooksOrdered();
+                foreach (var book in booksInShelf)
+                {
+                    allBooks.Add($"{book.author} — {book.title} ({book.genre})");
+                }
+        }
+        return allBooks;
         }
 
+        
         /// <summary>
-        /// Получить количество свободных мест в конкретном шкафу
+        /// Получить книги указанного жанра в виде строковых представлений
         /// </summary>
-        /// <param name="shelfIndex">Индекс шкафа в коллекции (начиная с 0)</param>
-        /// <returns>Количество свободных мест в указанном шкафу</returns>
-        public int GetFreeSpaceInShelf(int shelfIndex)
+        /// <param name="genre">Название жанра для фильтрации</param>
+        /// <returns>Список строк с информацией о книгах заданного жанра</returns>
+        public List<string> GetBooksByGenre(string genre)
         {
-            // Проверяем корректность индекса
-            if (shelfIndex < 0 || shelfIndex >= _shelves.Count)
+            // Проверяем корректность входных данных
+            if (string.IsNullOrEmpty(genre))
             {
-                throw new ArgumentOutOfRangeException(nameof(shelfIndex), "Индекс шкафа выходит за пределы допустимого диапазона");
+                return new List<string>(); // Возвращаем пустой список, если жанр не указан
             }
 
-            // Получаем конкретный шкаф
-            var shelf = _shelves[shelfIndex];
+            List<string> booksByGenre = new List<string>();
 
-            // Вычисляем свободное место
-            return shelf.capacity - shelf.books.Count;
+                // Ищем шкаф с указанным жанром
+                var shelf = FindShelfByGenre(genre);
+    
+            if (shelf == null)
+            {
+                return booksByGenre; // Если шкаф не найден, возвращаем пустой список
+            }
+
+        // Получаем все книги из шкафа
+        var booksInShelf = shelf.GetBooksOrdered();
+
+        // Формируем строковые представления для каждой книги
+        foreach (var book in booksInShelf)
+        {
+            booksByGenre.Add($"{book.author} — {book.title} ({book.genre})");
+        }
+
+        return booksByGenre;
         }
 
         /// <summary>
@@ -182,5 +188,155 @@ namespace BookLibrary
                 throw new Exception("Превышено максимальное количество шкафов в магазине");
             }
         }
+
+
+        /// <summary>
+        /// Получить список всех доступных жанров в магазине (жанры, представленные в шкафах)
+        /// </summary>
+        /// <returns>Список уникальных жанров, отсортированный по алфавиту</returns>
+        public List<string> GetAvailableGenres()
+        {
+            var genres = new HashSet<string>();
+
+            foreach (var shelf in _shelves)
+            {
+                if (!string.IsNullOrEmpty(shelf.shelfName))
+                {
+                    genres.Add(shelf.shelfName);
+                }
+            }
+
+            // Преобразуем в список и сортируем по алфавиту
+            var sortedGenres = genres.ToList();
+            sortedGenres.Sort();
+
+            return sortedGenres;
+        }
+
+
+
+        /// <summary>
+        /// Найти книги по названию или ID. Если жанр указан — ищет в шкафу этого жанра,
+        /// если не указан — во всём магазине. Сначала ищет по названию, затем (если не найдено) — по ID.
+        /// </summary>
+        /// <param name="genre">Жанр для поиска (может быть null или пустой)</param>
+        /// <param name="searchTerm">Название или ID книги для поиска</param>
+        /// <returns>Список найденных книг (может быть пустым, если книги не найдены)</returns>
+        public List<Book> FindBook(string genre, string searchTerm)
+        {
+            // Проверяем корректность входных данных
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                return new List<Book>(); // Возвращаем пустой список, если поисковый запрос пуст
+            }
+
+            List<Book> result = new List<Book>();
+            Bookcase shelf = null;
+
+            // Определяем область поиска в зависимости от наличия жанра
+            if (string.IsNullOrEmpty(genre))
+            {
+                // Ищем во всём магазине — перебираем все шкафы
+                foreach (var currentShelf in _shelves)
+                {
+                    // Шаг 1: поиск по точному названию в текущем шкафу
+                    Book foundByTitle = currentShelf.FindByTitle(searchTerm);
+                    if (foundByTitle != null)
+                    {
+                        result.Add(foundByTitle);
+                        return result; // Возвращаем сразу при нахождении — точное совпадение
+                    }
+
+                    // Шаг 2: если по названию не нашли, ищем по ID в текущем шкафу
+                    if (int.TryParse(searchTerm, out int bookId))
+                    {
+                        Book foundById = currentShelf.FindById(bookId);
+                        if (foundById != null)
+                        {
+                            result.Add(foundById);
+                        }
+                    }
+                }
+            }
+            else
+                {
+                    // Ищем только в указанном жанре
+                    shelf = FindShelfByGenre(genre);
+                    if (shelf == null)
+                    {
+                        return new List<Book>(); // Шкаф с таким жанром не найден — возвращаем пустой список
+                    }
+
+                    // Шаг 1: поиск по точному названию в указанном шкафу
+                    Book foundByTitle = shelf.FindByTitle(searchTerm);
+                    if (foundByTitle != null)
+                    {
+                        result.Add(foundByTitle);
+                        return result;
+                    }
+
+                    // Шаг 2: если по названию не нашли, ищем по ID в указанном шкафу
+                    if (int.TryParse(searchTerm, out int bookId))
+                    {
+                        Book foundById = shelf.FindById(bookId);
+                        if (foundById != null)
+                        {
+                            result.Add(foundById);
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+        /// <summary>
+        /// Метод продажи книги по ID
+        /// </summary>
+        /// <param name="bookId">ID книги для продажи</param>
+        /// <returns>True при удачной продаже, False при неудаче</returns>
+        public bool SellBookById(int bookId)
+        {
+            var bookToSell = FindBook(null, bookId.ToString()).FirstOrDefault();
+
+            if (bookToSell != null)
+            {
+                // Удаляем книгу через её метод
+                bool sold = bookToSell.SellBook(this);
+
+                if (sold)
+                {
+                    // После продажи проверяем и удаляем пустые шкафы
+                    RemoveEmptyShelves();
+                }
+
+                return sold;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Удаляет все шкафы, в которых нет книг
+        /// </summary>
+        private void RemoveEmptyShelves()
+        {
+            // Создаём список жанров пустых шкафов
+            var emptyShelves = new List<string>();
+
+            foreach (var shelf in _shelves)
+            {
+                if (shelf.GetAllBooks().Count == 0)
+                {
+                    emptyShelves.Add(shelf.shelfName);
+                }
+            }
+
+            // Удаляем пустые шкафы из коллекции
+            foreach (var genre in emptyShelves)
+            {
+                _shelves.RemoveAll(shelf => shelf.shelfName == genre);
+            }
+        }
+
     }
 }

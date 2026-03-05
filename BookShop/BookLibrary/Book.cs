@@ -98,10 +98,11 @@ namespace BookLibrary
         }
 
 
+
         /// <summary>
         /// Метод для продажи книги и обновления баланса магазина
         /// </summary>
-        public bool SellBook(Book book, Shop shop)
+        public bool SellBook(Shop shop)
         {
             // Проверяем, что магазин не пуст
             if (shop == null)
@@ -114,21 +115,20 @@ namespace BookLibrary
 
             if (shelf != null)
             {
-                // Ищем книгу в шкафу
-                var foundBook = shelf.FindByTitle(this.title);
+                // Ищем книгу в шкафу — используем точное совпадение по ID для надёжности
+                var foundBook = shelf.GetAllBooks().FirstOrDefault(book => book.id == this.id);
 
                 if (foundBook != null)
                 {
                     // Обновляем баланс магазина
                     shop.UpdateBalance(this.value);
-
                     // Удаляем книгу из шкафа
                     shelf.books.Remove(foundBook);
                     return true;
-                }
             }
+        }
 
-            return false;
+        return false;
         }
     }
 }
