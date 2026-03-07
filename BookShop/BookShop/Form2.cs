@@ -55,12 +55,8 @@ namespace BookShop
                 Book book = new Book();
                 book.GenerateRandom();
 
-                string rawTitle = book.title;
-                // Логика уникальности названия (обработка коллизий)
-                string uniqueTitle = GetUniqueTitle(rawTitle);
-
                 // Заполнение полей
-                txtTitle.Text = uniqueTitle;
+                txtTitle.Text = book.title;
                 txtAuthor.Text = book.author;
                 txtGenre.Text = book.genre;
                 txtPages.Text = book.pageCount.ToString();
@@ -77,18 +73,24 @@ namespace BookShop
         /// </summary>
         private string GetUniqueTitle(string baseTitle)
         {
-            // Получаем все текущие названия из магазина 
+            // Получаем все текущие названия из магазина
             var existingTitles = _store.GetAllBooks();
 
-            int suffix = 1;
-            string finalTitle = baseTitle;
+            // Если базового названия нет в списке — возвращаем его как уникальное
+            if (!IsTitleExists(baseTitle))
+            {
+                return baseTitle;
+            }
 
-            while (IsTitleExists(finalTitle))
+            int suffix = 1;
+            string finalTitle;
+
+            do
             {
                 suffix++;
-                // Проверяем, не заканчивается ли название уже на цифру, чтобы не получить "2033 2 2"
-                finalTitle = $"{baseTitle} {suffix}";
+                finalTitle = $"{baseTitle} ({suffix})";
             }
+            while (IsTitleExists(finalTitle));
 
             return finalTitle;
         }
@@ -136,13 +138,49 @@ namespace BookShop
                 return;
             }
 
+            // Получаем следующий доступный ID
+            int newId = GetNextAvailableId();
+
             try
             {
-                // Получаем следующий доступный ID
-                int newId = GetNextAvailableId();
 
+                string title = txtTitle.Text.Trim();
+                bool hasNumberSuffix = false;
 
-                Book newBook = new Book(txtTitle.Text, txtAuthor.Text, newId, txtGenre.Text, pages, price);
+                // Проверяем, что строка заканчивается на ) и имеет длину минимум 3 символа
+                if (title.EndsWith(")") && title.Length > 2)
+                {
+                    int lastOpenBracketIndex = title.LastIndexOf('(');
+
+                    // Проверяем, что открывающая скобка есть и находится перед закрывающей
+                    if (lastOpenBracketIndex > 0 && lastOpenBracketIndex < title.Length - 2)
+                    {
+                        // Извлекаем содержимое между скобками
+                        string content = title.Substring(lastOpenBracketIndex + 1, title.Length - lastOpenBracketIndex - 2);
+
+                        // Проверяем, что содержимое — это число
+                        if (int.TryParse(content, out int number))
+                        {
+                            hasNumberSuffix = true;
+
+                            DialogResult result = MessageBox.Show(
+                                "Название заканчивается на (число). Хотите удалить этот суффикс автоматически?",
+                                "Предупреждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                            if (result == DialogResult.No)
+                            {
+                                errorProvider1.SetError(txtTitle, "Уберите суффикс (число) из названия");
+                                _availableIds.Add(newId);
+                                return;
+                            }
+
+                            // Удаляем часть от открывающей скобки до конца
+                            title = title.Substring(0, lastOpenBracketIndex).Trim();
+                        }
+                    }
+                }
+
+                Book newBook = new Book(GetUniqueTitle(title), txtAuthor.Text, newId, txtGenre.Text, pages, price);
                 _store.AddBook(newBook);
 
                 MessageBox.Show("Книга успешно добавлена!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -156,6 +194,7 @@ namespace BookShop
             catch (Exception ex)
             {
                 MessageBox.Show($"Не удалось добавить книгу: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _availableIds.Add(newId);
             }
         }
 
@@ -249,6 +288,56 @@ namespace BookShop
         }
 
         /// <summary>
+        /// Метод поиска книги при нажатии на неё в ListBox
+        /// </summary>
+        private void lstBooks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Проверяем, что выбран какой‑то элемент
+            if (lstBooks.SelectedIndex == -1)
+            {
+                btnSell.Enabled = false;
+                return;
+            }
+
+            // Получаем текст выбранного элемента (Автор - "Название" (Жанр) #ID)
+            string selectedItem = lstBooks.SelectedItem.ToString();
+
+            // Извлекаем ID из строки (ищем шаблон #123 в конце строки)
+            int bookId = ExtractIdFromListBoxItem(selectedItem);
+            if (bookId <= 0)
+            {
+                MessageBox.Show("Не удалось определить ID книги из выбранного элемента.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblBookInfo.Text = "Книга не найдена.";
+                btnSell.Enabled = false;
+                return;
+            }
+
+            string selectgenre = cmbGeneres.SelectedItem.ToString();
+
+            if (selectgenre == "Все жанры")
+                selectgenre = null;
+
+            // Ищем книгу по ID в хранилище
+            var book = _store.FindBook(selectgenre, bookId.ToString()).FirstOrDefault();
+
+            if (book != null)
+            {
+                //Показываем информацию о книге
+                lblBookInfo.Text = $"Найдено: {book.title}\nАвтор: {book.author}\nЖанр: {book.genre}\nЦена: {book.value}\nID: {book.id}";
+                lblBookInfo.Visible = true;
+                // Сохраняем ID в Tag кнопки продать для удобства
+                btnSell.Tag = book.id;
+                btnSell.Enabled = true;
+            }
+            else
+            {
+                lblBookInfo.Text = "Книга не найдена.";
+                btnSell.Enabled = false;
+            }
+        }
+
+        /// <summary>
         /// Кнопка продажи книги
         /// </summary>
         private void btnSell_Click(object sender, EventArgs e)
@@ -319,6 +408,38 @@ namespace BookShop
                 return _nextId++;
             }
         }
+
+        /// <summary>
+        /// Вспомогательный метод для извлечения ID из конца строки элемента ListBox
+        /// Ожидаемый формат: "Автор — Название (Жанр) #123"
+        /// </summary>
+        private int ExtractIdFromListBoxItem(string itemText)
+        {
+            if (string.IsNullOrEmpty(itemText))
+                return -1;
+
+            // Ищем символ # с конца строки
+            int hashIndex = itemText.LastIndexOf('#');
+            if (hashIndex == -1)
+                return -1; // Символ # не найден
+
+            // Проверяем, что после # идут только цифры до самого конца строки
+            string idCandidate = itemText.Substring(hashIndex + 1);
+
+            // Убеждаемся, что оставшаяся часть состоит только из цифр и не пуста
+            if (string.IsNullOrEmpty(idCandidate) || !idCandidate.All(char.IsDigit))
+                return -1;
+
+            // Пытаемся распарсить число
+            if (int.TryParse(idCandidate, out int id))
+            {
+                return id;
+            }
+
+            return -1;
+        }
+
         #endregion
+
     }
 }

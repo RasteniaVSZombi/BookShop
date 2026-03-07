@@ -99,7 +99,8 @@ namespace BookLibrary
                 var booksInShelf = shelf.GetBooksOrdered();
                 foreach (var book in booksInShelf)
                 {
-                    allBooks.Add($"{book.author} — {book.title} ({book.genre})");
+                    //Автор - "Название" (Жанр) #ID
+                    allBooks.Add($"{book.author} - «{book.title}» ({book.genre}) #{book.id}");
                 }
         }
         return allBooks;
@@ -121,24 +122,24 @@ namespace BookLibrary
 
             List<string> booksByGenre = new List<string>();
 
-                // Ищем шкаф с указанным жанром
-                var shelf = FindShelfByGenre(genre);
+            // Ищем шкаф с указанным жанром
+            var shelf = FindShelfByGenre(genre);
     
             if (shelf == null)
             {
                 return booksByGenre; // Если шкаф не найден, возвращаем пустой список
             }
 
-        // Получаем все книги из шкафа
-        var booksInShelf = shelf.GetBooksOrdered();
+            // Получаем все книги из шкафа
+            var booksInShelf = shelf.GetBooksOrdered();
 
-        // Формируем строковые представления для каждой книги
-        foreach (var book in booksInShelf)
-        {
-            booksByGenre.Add($"{book.author} — {book.title} ({book.genre})");
-        }
+            // Формируем строковые представления для каждой книги
+            foreach (var book in booksInShelf)
+            {
+                booksByGenre.Add($"{book.author} - «{book.title}» ({book.genre}) #{book.id}");
+            }
 
-        return booksByGenre;
+            return booksByGenre;
         }
 
         /// <summary>
