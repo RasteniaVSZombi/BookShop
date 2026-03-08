@@ -111,6 +111,7 @@ namespace BookLibrary
                                   .Where(line => !string.IsNullOrWhiteSpace(line))
                                   .ToArray();
             string[] authors = File.ReadAllLines(authorsFile)
+                                   .Where(line => !string.IsNullOrWhiteSpace(line))
                                    .ToArray();
             string[] genres = File.ReadAllLines(genresFile)
                                   .Where(line => !string.IsNullOrWhiteSpace(line))
