@@ -64,11 +64,11 @@ namespace BookLibrary
         public Book(string title, string author, int id, string genre, int pageCount, float value)
         {
             // Инициализация каждого поля 
-            this.title = title;      
-            this.author = author; 
-            this.id = id;       
-            this.genre = genre; 
-            this.pageCount = pageCount; 
+            this.title = title;
+            this.author = author;
+            this.id = id;
+            this.genre = genre;
+            this.pageCount = pageCount;
             this.value = value;
         }
 
@@ -77,12 +77,12 @@ namespace BookLibrary
         /// </summary>
         public Book()
         {
-            title = string.Empty;  
-            author = string.Empty; 
-            id = 0;                
-            genre = string.Empty;   
-            pageCount = 0;     
-            value = 0;            
+            title = string.Empty;
+            author = string.Empty;
+            id = 0;
+            genre = string.Empty;
+            pageCount = 0;
+            value = 0;
         }
 
         /// <summary>
@@ -90,13 +90,41 @@ namespace BookLibrary
         /// </summary>
         public void GenerateRandom()
         {
-            title = randomTitles[random.Next(randomTitles.Length)];      
-            author = randomAuthors[random.Next(randomAuthors.Length)]; 
-            genre = randomGenres[random.Next(randomGenres.Length)];    
-            value = random.Next(randomValueMin, randomValueMax + 1);  
+            title = randomTitles[random.Next(randomTitles.Length)];
+            author = randomAuthors[random.Next(randomAuthors.Length)];
+            genre = randomGenres[random.Next(randomGenres.Length)];
+            value = random.Next(randomValueMin, randomValueMax + 1);
             pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
         }
 
+        /// <summary>
+        /// Генерирует случайные данные книги, загружая списки названий, авторов и жанров из текстовых файлов.
+        /// </summary>
+        public void GenerateRandomFromFiles()
+        {
+            string titlesFile = Path.Combine("NameData", "Titles.txt");
+            string authorsFile = Path.Combine("NameData", "Authors.txt");
+            string genresFile = Path.Combine("NameData", "Genres.txt");
+
+            // Чтение строк из файлов с отбрасыванием пустых и состоящих только из пробелов
+            string[] titles = File.ReadAllLines(titlesFile)
+                                  .Where(line => !string.IsNullOrWhiteSpace(line))
+                                  .ToArray();
+            string[] authors = File.ReadAllLines(authorsFile)
+                                   .ToArray();
+            string[] genres = File.ReadAllLines(genresFile)
+                                  .Where(line => !string.IsNullOrWhiteSpace(line))
+                                  .ToArray();
+
+            // Выбор случайных элементов
+            title = titles[random.Next(titles.Length)];
+            author = authors[random.Next(authors.Length)];
+            genre = genres[random.Next(genres.Length)];
+
+            // Генерация случайных числовых значений (как в исходном методе)
+            value = random.Next(randomValueMin, randomValueMax + 1);
+            pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
+        }
 
 
         /// <summary>
@@ -125,10 +153,10 @@ namespace BookLibrary
                     // Удаляем книгу из шкафа
                     shelf.books.Remove(foundBook);
                     return true;
+                }
             }
-        }
 
-        return false;
+            return false;
         }
     }
 }
