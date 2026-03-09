@@ -20,31 +20,6 @@ namespace BookLibrary
         public float value;       // Стоимость книги
         Random random = new Random();  // Генератор случайных чисел
 
-        // Массивы для случайной генерации данных
-        string[] randomTitles = {      // Возможные названия книг
-            "Потерялся в саду",
-            "Прибило временем",
-            "Крепкий щит",
-            "Чайный пьяница",
-            "Солнечное утро"
-        };
-
-        string[] randomAuthors = {     // Возможные авторы
-            "Виктор Горох",
-            "Олег Грушевский",
-            "Дмитрий Орехов",
-            "Алексей Долматов",
-            "Джон Подсолнух"
-        };
-
-        string[] randomGenres = {      // Возможные жанры
-            "Роман",
-            "Драма",
-            "Фантастика",
-            "Классика",
-            "Детектив"
-        };
-
         // Диапазоны для случайной генерации
         int randomPageCountMin = 1;     // Мин. количество страниц
         int randomPageCountMax = 1000;  // Макс. количество страниц
@@ -86,21 +61,9 @@ namespace BookLibrary
         }
 
         /// <summary>
-        /// Метод случайной генерации данных книги
+        /// Метод генерации случайных данных книги. Списки названий, авторов и жанров загружаются из текстовых файлов.
         /// </summary>
         public void GenerateRandom()
-        {
-            title = randomTitles[random.Next(randomTitles.Length)];
-            author = randomAuthors[random.Next(randomAuthors.Length)];
-            genre = randomGenres[random.Next(randomGenres.Length)];
-            value = random.Next(randomValueMin, randomValueMax + 1);
-            pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
-        }
-
-        /// <summary>
-        /// Генерирует случайные данные книги, загружая списки названий, авторов и жанров из текстовых файлов.
-        /// </summary>
-        public void GenerateRandomFromFiles()
         {
             string titlesFile = Path.Combine("NameData", "Titles.txt");
             string authorsFile = Path.Combine("NameData", "Authors.txt");
@@ -108,25 +71,19 @@ namespace BookLibrary
 
             // Чтение строк из файлов с отбрасыванием пустых и состоящих только из пробелов
             string[] titles = File.ReadAllLines(titlesFile)
-                                  .Where(line => !string.IsNullOrWhiteSpace(line))
-                                  .ToArray();
+                                  .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
             string[] authors = File.ReadAllLines(authorsFile)
-                                   .Where(line => !string.IsNullOrWhiteSpace(line))
-                                   .ToArray();
+                                   .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
             string[] genres = File.ReadAllLines(genresFile)
-                                  .Where(line => !string.IsNullOrWhiteSpace(line))
-                                  .ToArray();
+                                  .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
 
             // Выбор случайных элементов
             title = titles[random.Next(titles.Length)];
             author = authors[random.Next(authors.Length)];
             genre = genres[random.Next(genres.Length)];
-
-            // Генерация случайных числовых значений (как в исходном методе)
             value = random.Next(randomValueMin, randomValueMax + 1);
             pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
         }
-
 
         /// <summary>
         /// Метод для продажи книги и обновления баланса магазина
