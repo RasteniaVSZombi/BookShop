@@ -441,5 +441,19 @@ namespace BookShop
 
         #endregion
 
+        private void lblGenereSelect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblUnhappyCaption_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panelTop_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
