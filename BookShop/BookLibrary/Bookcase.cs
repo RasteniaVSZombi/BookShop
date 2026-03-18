@@ -31,10 +31,26 @@ namespace BookLibrary
         }
 
         /// <summary>
+        /// Проверяет, пуст ли шкаф
+        /// </summary>
+        public bool IsEmpty()
+        {
+            return books.Count == 0;
+        }
+
+        /// <summary>
+        /// Проверяет, заполнен ли шкаф
+        /// </summary>
+        public bool IsFull()
+        {
+            return books.Count >= capacity;
+        }
+
+        /// <summary>
         /// Добавляет книгу в шкаф
         /// </summary>
         /// <param name="book">Книга, которую необходимо добавить</param>
-        /// <returns></returns>
+        /// <returns></returns>      
         public bool AddBook(Book book)
         {
             // Проверка вместимости
@@ -51,6 +67,23 @@ namespace BookLibrary
 
             books.Add(book);
             return true;
+        }
+
+        /// <summary>
+        /// Удаляет книгу из шкафа.
+        /// Если шкаф стал пустым, его жанр сбрасывается.
+        /// </summary>
+        public bool RemoveBook(Book book)
+        {
+            if (book == null)
+                return false;
+
+            bool removed = books.Remove(book);
+
+            if (removed && books.Count == 0)
+                shelfName = "";
+
+            return removed;
         }
 
         /// <summary>
