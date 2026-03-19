@@ -37,6 +37,7 @@ namespace BookShop
             UpdateBalanceLabel();
             LoadGenres();
 
+
             // Настройка стилей (User-friendly)
             this.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblBalance.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
