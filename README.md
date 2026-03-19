@@ -1,4 +1,5 @@
-# BookShop
+# BookShop 
+<img width="100" height="100" alt="BookyBooky" src="https://github.com/user-attachments/assets/12012c36-7596-4495-94eb-1c5a6b15933b" />
 
 Простое приложение «Книжный магазин», разработанное на C# (.NET, Windows Forms).
 Позволяет создавать книги, хранить их в шкафах по жанрам, искать и продавать их.
