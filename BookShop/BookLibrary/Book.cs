@@ -213,5 +213,62 @@ namespace BookLibrary
 
             return false;
         }
+
+        /// <summary>
+        /// Инициализирует файл базы данных BooksDb.txt, записывая в него все пары автор-название 
+        /// из исходного файла AuthorsTitles.txt. Формат: автор и название через табуляцию, каждая пара на новой строке.
+        /// </summary>
+        public void InitializeDB()
+        {
+            string authorsTitlesFile = Path.Combine("NameData", "AuthorsTitles.txt");
+            string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
+
+            // Если исходного файла нет, создаём пустой файл базы данных
+            if (!File.Exists(authorsTitlesFile))
+            {
+                File.WriteAllText(booksDbFile, string.Empty);
+                return;
+            }
+
+            var lines = File.ReadAllLines(authorsTitlesFile);
+            var nonEmptyLines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+
+            // Проверка чётности количества непустых строк (автор + название)
+            if (nonEmptyLines.Length % 2 != 0)
+            {
+                // При неверном формате создаём пустой файл
+                File.WriteAllText(booksDbFile, string.Empty);
+                return;
+            }
+
+            // Перезапись файла с парами в формате "автор\tназвание"
+            using (var writer = new StreamWriter(booksDbFile, false))
+            {
+                for (int i = 0; i < nonEmptyLines.Length; i += 2)
+                {
+                    string author = nonEmptyLines[i].Trim();
+                    string title = nonEmptyLines[i + 1].Trim();
+                    writer.WriteLine($"{author}\t{title}");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Добавляет текущую книгу в файл базы данных BooksDb.txt.
+        /// Формат: автор и название через табуляцию. Если поля пусты, ничего не делается.
+        /// </summary>
+        public void AddToDB()
+        {
+            if (string.IsNullOrWhiteSpace(author) || string.IsNullOrWhiteSpace(title))
+                return; // Нечего добавлять
+
+            string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
+            // Открываем для добавления (если файла нет, он будет создан)
+            using (var writer = new StreamWriter(booksDbFile, true))
+            {
+                writer.WriteLine($"{author}\t{title}");
+            }
+        }
     }
 }
