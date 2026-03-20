@@ -1,8 +1,10 @@
-﻿using System;
+﻿using BookLibrary;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,27 +15,13 @@ namespace BookShop
 
     public partial class TitleScreen : Form
     {
-        // Публичные показатели для передачи в MainForm
-        public string SelectedDifficulty { get; private set; }
-        public bool IsEasyMode { get; private set; } = false;
-
-        // Игровые параметры (пока одинаковые для отладки)
-        public int StartBalance { get; private set; } = 1000;
-        public int OrderDeliveryTime { get; private set; } = 10; // секунд
-        public int RandomBookTime { get; private set; } = 15; // секунд (n)
-        public int CustomerTime { get; private set; } = 20; // секунд (m)
-        public int MaxUnhappyCustomers { get; private set; } = 3;
-        public int MaxQueueSize { get; private set; } = 5;
-        public int GameDayTime { get; private set; } = 300; // секунд (5 минут)
-        public int Bonus1 { get; private set; } = 10; // за отклонение ошибки
-        public int Bonus2 { get; private set; } = 15; // за плагиат
-        public int Bonus3 { get; private set; } = 12; // за опечатку
-        public int Penalty { get; private set; } = 15;
+        public GameSettings _gameSettings;
 
         public TitleScreen()
         {
             InitializeComponent();
             StyleTitleScreen();
+            _gameSettings = new GameSettings();
         }
 
         private void StyleTitleScreen()
@@ -69,30 +57,8 @@ namespace BookShop
 
             if (result == DialogResult.Yes)
             {
-                SelectedDifficulty = difficulty;
-
-                // Настройка параметров сложности
-                switch (difficulty)
-                {
-                    case "Лёгкий":
-                        IsEasyMode = true;
-                        MaxQueueSize = 7;
-                        MaxUnhappyCustomers = 5;
-                        GameDayTime = 400;
-                        break;
-                    case "Нормальный":
-                        IsEasyMode = false;
-                        MaxQueueSize = 5;
-                        MaxUnhappyCustomers = 3;
-                        GameDayTime = 300;
-                        break;
-                    case "Сложный":
-                        IsEasyMode = false;
-                        MaxQueueSize = 3;
-                        MaxUnhappyCustomers = 2;
-                        GameDayTime = 200;
-                        break;
-                }
+                _gameSettings.Difficulty = difficulty;
+                _gameSettings.SetDifficulty(difficulty);// Настройка параметров сложности
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -117,7 +83,7 @@ namespace BookShop
         private void btnAbout_Click(object sender, EventArgs e)
         {
             MessageBox.Show(
-                
+
                 "Добро пожаловать в симулятор книжного магазина!\n\n" +
                 "Ваша задача:\n" +
                 "1.Заказывайте книги у поставщиков\n" +
@@ -136,9 +102,5 @@ namespace BookShop
             );
         }
 
-        private void lblNameGame_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

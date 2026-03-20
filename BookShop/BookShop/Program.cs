@@ -1,4 +1,5 @@
 using BookShop;
+using BookLibrary; // Добавляем using для доступа к GameSettings
 
 namespace BookStore
 {
@@ -10,23 +11,20 @@ namespace BookStore
             //var config = new ApplicationConfiguration();
             //config.InitializeOnMainThread = true;
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
             
             // Сначала показываем титульный экран
             TitleScreen titleScreen = new TitleScreen();
 
-             if (titleScreen.ShowDialog() == DialogResult.OK)
-             {
-              // Если игрок выбрал сложность → запускаем основную форму
-                    MainForm mainForm = new MainForm();
-                    Application.Run(mainForm);
-             }
-             else
-             {
-              // Если игрок закрыл титульный экран:выходим
-              Application.Exit();
-             }
-            
+            if (titleScreen.ShowDialog() == DialogResult.OK)
+            {
+                // Если игрок выбрал сложность → запускаем основную форму
+                Application.Run(new MainForm(titleScreen._gameSettings));
+            }
+            else
+            {
+                // Если игрок закрыл титульный экран:выходим
+                Application.Exit();
+            }
         }
     }
 }

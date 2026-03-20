@@ -28,7 +28,7 @@ namespace BookLibrary
         int randomPageCountMax = 1000;  // Макс. количество страниц
 
         int randomValueMin = 100;       // Мин. стоимость
-        int randomValueMax = 10000;     // Макс. стоимость
+        int randomValueMax = 2000;     // Макс. стоимость
 
         /// <summary>
         /// Конструктор с параметрами
@@ -83,9 +83,32 @@ namespace BookLibrary
             var lines = File.ReadAllLines(authorsTitlesFile);
             var nonEmptyLines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
 
-            if (nonEmptyLines.Length % 2 != 0)
+            List<(string Author, string Title)> bookPairs = new List<(string Author, string Title)>();
+
+            foreach (var line in nonEmptyLines)
             {
-                // Если формат файла нарушен, заполняем поля по умолчанию
+                // Разбиваем строку по разделителю " - "
+                var parts = line.Split(new[] { " - " }, StringSplitOptions.None);
+
+                if (parts.Length == 2)
+                {
+                    string author = parts[0].Trim();
+                    string title = parts[1].Trim();
+                    bookPairs.Add((author, title));
+                }
+                else
+                {
+                    // Если формат строки нарушен, пропускаем её
+                    continue;
+                }
+            }
+            // Чтение жанров
+            string[] genres = File.ReadAllLines(genresFile)
+                                  .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+            
+            if (genres.Length == 0 || bookPairs.Count == 0)
+            {
+                // Нет данных для генерации
                 title = string.Empty;
                 author = string.Empty;
                 genre = string.Empty;
@@ -94,18 +117,62 @@ namespace BookLibrary
                 return;
             }
 
-            List<string> authors = new List<string>();
-            List<string> titles = new List<string>();
-            for (int i = 0; i < nonEmptyLines.Length; i += 2)
-            {
-                authors.Add(nonEmptyLines[i].Trim());
-                titles.Add(nonEmptyLines[i + 1].Trim());
-            }
+            // Выбираем пару автор-название
+            var randomPair = bookPairs[random.Next(bookPairs.Count)];
+            author = randomPair.Author;
+            title = randomPair.Title;
 
+            // Жанр
+            genre = genres[random.Next(genres.Length)];
+
+            // Числовые характеристики
+            value = random.Next(randomValueMin, randomValueMax + 1);
+            pageCount = random.Next(randomPageCountMin, randomPageCountMax + 1);
+        }
+
+        /// <summary>
+        /// Метод генерации случайных данных книги. Случайно выбирает один из трёх сценариев:
+        /// 0 — обычная книга (автор и название соответствуют друг другу);
+        /// 1 — плагиат (автор и название выбираются строго случайно из всего списка, флаг plag = true);
+        /// 2 — опечатка (как обычная, но в названии один символ заменяется на другой, флаг typo = true).
+        /// Жанр и числовые характеристики генерируются одинаково для всех сценариев.
+        /// </summary>
+        public void GenerateRandomBook()
+        {
+            // Сброс флагов
+            plag = false;
+            typo = false;
+
+            string authorsTitlesFile = Path.Combine("NameData", "AuthorsTitles.txt");
+            string genresFile = Path.Combine("NameData", "Genres.txt");
+
+            // Чтение и разбор файла с парами автор-название
+            var lines = File.ReadAllLines(authorsTitlesFile);
+            var nonEmptyLines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+
+            List<(string Author, string Title)> bookPairs = new List<(string Author, string Title)>();
+
+            foreach (var line in nonEmptyLines)
+            {
+                // Разбиваем строку по разделителю " - "
+                var parts = line.Split(new[] { " - " }, StringSplitOptions.None);
+
+                if (parts.Length == 2)
+                {
+                    string author = parts[0].Trim();
+                    string title = parts[1].Trim();
+                    bookPairs.Add((author, title));
+                }
+                else
+                {
+                    // Если формат строки нарушен, пропускаем её
+                    continue;
+                }
+            }
             // Чтение жанров
             string[] genres = File.ReadAllLines(genresFile)
                                   .Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
-            if (genres.Length == 0 || authors.Count == 0 || titles.Count == 0)
+            if (genres.Length == 0 || bookPairs.Count == 0)
             {
                 // Нет данных для генерации
                 title = string.Empty;
@@ -120,53 +187,65 @@ namespace BookLibrary
             int scenario = random.Next(3);
 
             // Выбор индекса обычной пары (может пригодиться для сценариев 0 и 2)
-            int normalIndex = random.Next(authors.Count);
+            int normalIndex = random.Next(bookPairs.Count);
 
             switch (scenario)
             {
                 case 0: // Обычная книга
-                    author = authors[normalIndex];
-                    title = titles[normalIndex];
+                    var normalPair = bookPairs[normalIndex];
+                    author = normalPair.Author;
+                    title = normalPair.Title;
                     break;
 
                 case 1: // Плагиат
-                    if (authors.Count < 2)
+                    if (bookPairs.Count < 2)
                     {
                         // Если всего одна пара, плагиат невозможен — делаем обычную книгу
-                        author = authors[0];
-                        title = titles[0];
+                        var singlePair = bookPairs[0];
+                        author = singlePair.Author;
+                        title = singlePair.Title;
                         plag = false; // не плагиат
                     }
                     else
                     {
-                        int authorIndex = random.Next(authors.Count);
+                        // Выбираем случайного автора
+                        int authorIndex = random.Next(bookPairs.Count);
+                        string selectedAuthor = bookPairs[authorIndex].Author;
+
+                        // Выбираем случайное название из другой пары
                         int titleIndex;
                         do
                         {
-                            titleIndex = random.Next(titles.Count);
+                            titleIndex = random.Next(bookPairs.Count);
                         } while (titleIndex == authorIndex);
-                        author = authors[authorIndex];
-                        title = titles[titleIndex];
+
+                        author = selectedAuthor;
+                        title = bookPairs[titleIndex].Title;
                         plag = true;
                     }
                     break;
 
                 case 2: // Опечатка
-                    author = authors[normalIndex];
-                    title = titles[normalIndex];
+                    var typoPair = bookPairs[normalIndex];
+                    author = typoPair.Author;
+                    title = typoPair.Title;
+
                     // Вносим опечатку: заменяем один случайный символ на другой (отличный от исходного)
                     if (!string.IsNullOrEmpty(title))
                     {
                         int pos = random.Next(title.Length);
                         char original = title[pos];
                         char newChar;
+
                         // Набор допустимых символов для замены (можно расширить)
                         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789";
+                        
                         do
                         {
                             newChar = chars[random.Next(chars.Length)];
                         } while (newChar == original); // Гарантируем отличие
-                                                       // Замена символа
+
+                        // Замена символа
                         char[] charsArr = title.ToCharArray();
                         charsArr[pos] = newChar;
                         title = new string(charsArr);
@@ -215,48 +294,9 @@ namespace BookLibrary
         }
 
         /// <summary>
-        /// Инициализирует файл базы данных BooksDb.txt, записывая в него все пары автор-название 
-        /// из исходного файла AuthorsTitles.txt. Формат: автор и название через табуляцию, каждая пара на новой строке.
-        /// </summary>
-        public void InitializeDB()
-        {
-            string authorsTitlesFile = Path.Combine("NameData", "AuthorsTitles.txt");
-            string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
-
-            // Если исходного файла нет, создаём пустой файл базы данных
-            if (!File.Exists(authorsTitlesFile))
-            {
-                File.WriteAllText(booksDbFile, string.Empty);
-                return;
-            }
-
-            var lines = File.ReadAllLines(authorsTitlesFile);
-            var nonEmptyLines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-
-            // Проверка чётности количества непустых строк (автор + название)
-            if (nonEmptyLines.Length % 2 != 0)
-            {
-                // При неверном формате создаём пустой файл
-                File.WriteAllText(booksDbFile, string.Empty);
-                return;
-            }
-
-            // Перезапись файла с парами в формате "автор\tназвание"
-            using (var writer = new StreamWriter(booksDbFile, false))
-            {
-                for (int i = 0; i < nonEmptyLines.Length; i += 2)
-                {
-                    string author = nonEmptyLines[i].Trim();
-                    string title = nonEmptyLines[i + 1].Trim();
-                    writer.WriteLine($"{author}\t{title}");
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Добавляет текущую книгу в файл базы данных BooksDb.txt.
-        /// Формат: автор и название через табуляцию. Если поля пусты, ничего не делается.
+        /// Добавляет текущую книгу в файл базы данных BooksDb.txt, если такой пары ещё нет.
+        /// Формат: автор и название через табуляцию.
+        /// Если поля пусты или пара уже существует, ничего не делается.
         /// </summary>
         public void AddToDB()
         {
@@ -264,10 +304,64 @@ namespace BookLibrary
                 return; // Нечего добавлять
 
             string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
-            // Открываем для добавления (если файла нет, он будет создан)
-            using (var writer = new StreamWriter(booksDbFile, true))
+            string entryToCheck = $"{author}\t{title}";
+            bool isDuplicate = false;
+
+            try
             {
-                writer.WriteLine($"{author}\t{title}");
+                // Проверяем существование файла
+                if (File.Exists(booksDbFile))
+                {
+                    // Читаем все существующие записи
+                    var existingEntries = File.ReadAllLines(booksDbFile);
+
+                    // Проверяем каждую запись
+                    foreach (var line in existingEntries)
+                    {
+                        var parts = line.Split('\t');
+                        if (parts.Length != 2) continue;
+
+                        string storedAuthor = parts[0].Trim();
+                        string storedTitle = parts[1].Trim();
+
+                        // Очищаем заголовок от номеров сиквелов
+                        if (storedTitle.Contains(" ("))
+                        {
+                            int openBracket = storedTitle.LastIndexOf('(');
+                            storedTitle = storedTitle.Substring(0, openBracket).Trim();
+                        }
+
+                        // Очищаем проверяемый заголовок
+                        string cleanTitle = title;
+                        if (cleanTitle.Contains(" ("))
+                        {
+                            int openBracket = cleanTitle.LastIndexOf('(');
+                            cleanTitle = cleanTitle.Substring(0, openBracket).Trim();
+                        }
+
+                        // Проверяем совпадение
+                        if (storedAuthor == author && storedTitle == cleanTitle)
+                        {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Если дубликат не найден - добавляем запись
+                if (!isDuplicate)
+                {
+                    // Открываем файл для добавления новой записи
+                    using (var writer = new StreamWriter(booksDbFile, true))
+                {
+                    writer.WriteLine(entryToCheck);
+                }
+            }
+        }
+            catch (Exception ex)
+            {
+                // Обработка ошибок
+                throw new Exception($"Ошибка при записи в БД: {ex.Message}");
             }
         }
     }

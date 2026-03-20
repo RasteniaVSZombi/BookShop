@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace BookShop
     {
         private Shop _store;
 
+        private GameSettings _gameSettings;
+
         // Свободные ID, доступные для повторного использования (хранятся в отсортированном виде)
         private SortedSet<int> _availableIds = new SortedSet<int>();
 
@@ -30,10 +33,13 @@ namespace BookShop
         /// <summary>
         /// Конструктор формы. Инициализирует компоненты и настраивает стили
         /// </summary>
-        public MainForm()
+        public MainForm(GameSettings sourceSettings)
         {
             InitializeComponent();
             _store = new Shop(3, 5); // Максимум 3 шкафа по 5 книг
+            _store.InitializeDB();
+            _gameSettings = sourceSettings;
+            _store.UpdateBalance(_gameSettings.StartBalance);
             UpdateBalanceLabel();
             LoadGenres();
 
@@ -72,13 +78,18 @@ namespace BookShop
         /// <summary>
         /// Проверяет существующие книги и добавляет цифру к названию при конфликте.
         /// </summary>
-        private string GetUniqueTitle(string baseTitle)
+        private string GetUniqueTitle(string baseTitle, string author)
         {
-            // Получаем все текущие названия из магазина
-            var existingTitles = _store.GetAllBooks();
+            // Получаем все текущие книги из магазина
+            var allBooks = _store.GetAllBooks();
+
+            // Проверяем, есть ли книга с таким же автором и названием
+            var existingBook = allBooks.FirstOrDefault(b =>
+                b.author.Equals(author, StringComparison.OrdinalIgnoreCase) &&
+                b.title.Equals(baseTitle, StringComparison.OrdinalIgnoreCase));
 
             // Если базового названия нет в списке — возвращаем его как уникальное
-            if (!IsTitleExists(baseTitle))
+            if (!IsTitleExists(baseTitle, author))
             {
                 return baseTitle;
             }
@@ -91,7 +102,7 @@ namespace BookShop
                 suffix++;
                 finalTitle = $"{baseTitle} ({suffix})";
             }
-            while (IsTitleExists(finalTitle));
+            while (IsTitleExists(finalTitle, author));
 
             return finalTitle;
         }
@@ -99,7 +110,7 @@ namespace BookShop
         /// <summary>
         /// Функция проверки существования книги (для проверки уникальности имени)
         /// </summary>
-        private bool IsTitleExists(string title)
+        private bool IsTitleExists(string title, string author)
         {
             var shelves = _store.GetAllBooks();
 
@@ -107,7 +118,7 @@ namespace BookShop
 
             foreach (var book in shelves)
             {
-                if (book.title == title) return true;
+                if (book.title == title && book.author == author) return true;
             }
             return false;
         }
@@ -136,6 +147,13 @@ namespace BookShop
                 errorProvider1.GetError(txtGenre) != "" || errorProvider1.GetError(txtPages) != "" ||
                 errorProvider1.GetError(txtPrice) != "")
             {
+                return;
+            }
+
+            // Проверяем достаточно ли средств на балансе
+            if (_store.Balance < price)
+            {
+                MessageBox.Show("Недостаточно средств для заказа книги!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -181,19 +199,34 @@ namespace BookShop
                     }
                 }
 
-                Book newBook = new Book(GetUniqueTitle(title), txtAuthor.Text, newId, txtGenre.Text, pages, price);
-                _store.AddBook(newBook);
+                // Снимаем стоимость книги с баланса
+                _store.UpdateBalance(-price);
 
-                MessageBox.Show("Книга успешно добавлена!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Book newBook = new Book(GetUniqueTitle(title, txtAuthor.Text), txtAuthor.Text, newId, txtGenre.Text, pages, price);
+                if (_store.AddBook(newBook))
+                {
+                    MessageBox.Show("Книга успешно заказана! Ожидайте доставки...", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Очистка полей
-                txtTitle.Clear(); txtAuthor.Clear(); txtGenre.Clear(); txtPages.Clear(); txtPrice.Clear();
+                    // Очистка полей
+                    txtTitle.Clear(); txtAuthor.Clear(); txtGenre.Clear(); txtPages.Clear(); txtPrice.Clear();
 
-                // Обновление списка жанров на второй вкладке
-                LoadGenres();
+                    // Обновление списка жанров и баланса
+                    LoadGenres();
+                    UpdateBalanceLabel();
+                }
+                else
+                {
+                    // Если добавление книги не удалось - возвращаем деньги
+                    _store.UpdateBalance(price);
+                    UpdateBalanceLabel();
+                    MessageBox.Show("Не удалось добавить книгу в магазин", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
+                // Возвращаем деньги при ошибке
+                _store.UpdateBalance(price);
+                UpdateBalanceLabel();
                 MessageBox.Show($"Не удалось добавить книгу: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _availableIds.Add(newId);
             }
@@ -442,19 +475,5 @@ namespace BookShop
 
         #endregion
 
-        private void lblGenereSelect_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lblUnhappyCaption_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void panelTop_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }

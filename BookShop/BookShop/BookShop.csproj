@@ -28,13 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="NameData\Authors.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="NameData\AuthorsTitles.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="NameData\Genres.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NameData\Titles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

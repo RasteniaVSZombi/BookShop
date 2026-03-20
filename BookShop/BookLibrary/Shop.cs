@@ -1,6 +1,7 @@
 ﻿using BookLibrary;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,12 +63,12 @@ namespace BookLibrary
         /// <summary>
         /// Обновить баланс магазина
         /// </summary>
-        /// <param name="amount">Сумма для добавления</param>
+        /// <param name="amount">Сумма для изменения баланса</param>
         public void UpdateBalance(float amount)
         {
-            if (amount < 0)
+            if (amount > _balance && amount < 0)
             {
-                throw new ArgumentException("Сумма не может быть отрицательной");
+                throw new ArgumentException("Недостаточно средств для операции");
             }
 
             _balance += amount;
@@ -155,10 +156,18 @@ namespace BookLibrary
                 }
             }
 
-            // Если шкафы этого жанра есть, но все заполнены —
-            //    пытаемся создать новый шкаф
+            // Если шкафы этого жанра есть, но все заполнены — ищем пустой шкаф
             if (genreShelves.Count > 0)
             {
+                // Ищем пустой шкаф среди всех
+                var emptyShelf1 = _shelves.FirstOrDefault(shelf => shelf.IsEmpty());
+
+                if (emptyShelf1 != null)
+                {
+                    return emptyShelf1.AddBook(book);
+                }
+
+                // Если пустого нет, проверяем возможность добавления нового шкафа
                 if (_shelves.Count < _maxShelves)
                 {
                     var newShelf = new Bookcase(_ShelfCapacity);
@@ -290,6 +299,50 @@ namespace BookLibrary
         public List<Bookcase> GetAllShelves()
         {
             return new List<Bookcase>(_shelves);
+        }
+
+
+        /// <summary>
+        /// Инициализирует файл базы данных BooksDb.txt, записывая в него все пары автор-название 
+        /// из исходного файла AuthorsTitles.txt. Формат: автор и название через табуляцию, каждая пара на новой строке.
+        /// </summary>
+        public void InitializeDB()
+        {
+            string authorsTitlesFile = Path.Combine("NameData", "AuthorsTitles.txt");
+            string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
+
+            // Если исходного файла нет, создаём пустой файл базы данных
+            if (!File.Exists(authorsTitlesFile))
+            {
+                File.WriteAllText(booksDbFile, string.Empty);
+                return;
+            }
+
+            var lines = File.ReadAllLines(authorsTitlesFile);
+            var nonEmptyLines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+
+            // Обработка данных в формате "Автор - Название"
+            List<(string Author, string Title)> bookPairs = new List<(string Author, string Title)>();
+
+            foreach (var line in nonEmptyLines)
+            {
+                var parts = line.Split(new[] { " - " }, StringSplitOptions.None);
+                if (parts.Length == 2)
+                {
+                    string author = parts[0].Trim();
+                    string title = parts[1].Trim();
+                    bookPairs.Add((author, title));
+                }
+            }
+
+            // Перезапись файла с парами в формате "автор\tназвание"
+            using (var writer = new StreamWriter(booksDbFile, false))
+            {
+                    foreach (var pair in bookPairs)
+                    {
+                        writer.WriteLine($"{pair.Author}\t{pair.Title}");
+                    }
+            }
         }
     }
 }

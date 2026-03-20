@@ -47,12 +47,15 @@ namespace BookLibrary
         }
 
         /// <summary>
-        /// Добавляет книгу в шкаф
+        /// Добавляет книгу в шкаф и Базу Данных
         /// </summary>
         /// <param name="book">Книга, которую необходимо добавить</param>
         /// <returns></returns>      
         public bool AddBook(Book book)
         {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
             // Проверка вместимости
             if (books.Count >= capacity)
                 return false;
@@ -66,6 +69,18 @@ namespace BookLibrary
                 return false;
 
             books.Add(book);
+            try
+            {
+                // Затем записываем в БД
+                book.AddToDB();
+            }
+            catch (Exception ex)
+            {
+                // Если ошибка при записи в БД - удаляем книгу из шкафа
+                books.Remove(book);
+                throw new Exception("Ошибка при добавлении в БД", ex);
+            }
+
             return true;
         }
 
