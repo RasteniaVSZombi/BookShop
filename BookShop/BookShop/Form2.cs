@@ -30,6 +30,16 @@ namespace BookShop
         // Следующий новый ID (если нет свободных)
         private int _nextId = 1;
 
+        //Сколько времени прошло в секундах
+        private int _elapsedTime = 0;
+
+        //Флаг видимости вкладки "Поставки"
+        private bool IsPageDeliveriesVisible = false;
+
+        private List<Book> _orderedBooks = new List<Book>(); // Список заказанных книг
+        private List<Book> _pendingDeliveries = new List<Book>(); // Список поставок
+
+
         /// <summary>
         /// Конструктор формы. Инициализирует компоненты и настраивает стили
         /// </summary>
@@ -37,12 +47,32 @@ namespace BookShop
         {
             InitializeComponent();
             _store = new Shop(3, 5); // Максимум 3 шкафа по 5 книг
+
             _store.InitializeDB();
+
             _gameSettings = sourceSettings;
+
             _store.UpdateBalance(_gameSettings.StartBalance);
             UpdateBalanceLabel();
+
             LoadGenres();
 
+            // Инициализируем список поставок
+            UpdateDeliveriesList();
+
+            tabControlMain.TabPages.Remove(tabPageDeliveries);
+
+            // Настройка таймеров
+            _deliveryTimer.Interval = (int)(_gameSettings.OrderDeliveryTime * 1000);//в миллисекундах
+            _deliveryTimer.Tick += DeliveryTimer_Tick;
+
+            _timerRandomBooks.Interval = (int)(_gameSettings.RandomBookTime * 1000); // в миллисекундах
+            _timerRandomBooks.Tick += RandomBooksTimer_Tick;
+            _timerRandomBooks.Start(); // запускаем таймер при старте
+
+            _gameTimer.Interval = 1000; // интервал в 1 секунду
+            _gameTimer.Tick += GameTimer_Tick;
+            _gameTimer.Start(); // запускаем таймер при старте
 
             // Настройка стилей (User-friendly)
             this.Font = new System.Drawing.Font("Segoe UI", 10F);
@@ -157,9 +187,6 @@ namespace BookShop
                 return;
             }
 
-            // Получаем следующий доступный ID
-            int newId = GetNextAvailableId();
-
             try
             {
 
@@ -189,7 +216,6 @@ namespace BookShop
                             if (result == DialogResult.No)
                             {
                                 errorProvider1.SetError(txtTitle, "Уберите суффикс (число) из названия");
-                                _availableIds.Add(newId);
                                 return;
                             }
 
@@ -199,36 +225,53 @@ namespace BookShop
                     }
                 }
 
-                // Снимаем стоимость книги с баланса
+                // Создаем книгу для заказа
+                Book orderedBook = new Book(title, txtAuthor.Text, 0, txtGenre.Text, pages, price);
+                orderedBook.order = true;
+
+                // Добавляем в список заказанных
+                _orderedBooks.Add(orderedBook);
+
+                // Снимаем стоимость сразу
                 _store.UpdateBalance(-price);
+                UpdateBalanceLabel();
 
-                Book newBook = new Book(GetUniqueTitle(title, txtAuthor.Text), txtAuthor.Text, newId, txtGenre.Text, pages, price);
-                if (_store.AddBook(newBook))
-                {
-                    MessageBox.Show("Книга успешно заказана! Ожидайте доставки...", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Запускаем таймер доставки
+                _deliveryTimer.Start();
 
-                    // Очистка полей
-                    txtTitle.Clear(); txtAuthor.Clear(); txtGenre.Clear(); txtPages.Clear(); txtPrice.Clear();
+                MessageBox.Show("Книга успешно заказана! Ожидайте доставки...", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Обновление списка жанров и баланса
-                    LoadGenres();
-                    UpdateBalanceLabel();
-                }
-                else
-                {
-                    // Если добавление книги не удалось - возвращаем деньги
-                    _store.UpdateBalance(price);
-                    UpdateBalanceLabel();
-                    MessageBox.Show("Не удалось добавить книгу в магазин", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                // Очищаем поля
+                txtTitle.Clear();
+                txtAuthor.Clear();
+                txtGenre.Clear();
+                txtPages.Clear();
+                txtPrice.Clear();
             }
             catch (Exception ex)
             {
                 // Возвращаем деньги при ошибке
                 _store.UpdateBalance(price);
                 UpdateBalanceLabel();
-                MessageBox.Show($"Не удалось добавить книгу: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                _availableIds.Add(newId);
+                MessageBox.Show($"Не удалось заказать книгу: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Метод обработки таймера доставки заказанных книг
+        private void DeliveryTimer_Tick(object sender, EventArgs e)
+        {
+            if (_orderedBooks.Count > 0)
+            {
+                Book deliveredBook = _orderedBooks[0];
+                _orderedBooks.RemoveAt(0);
+
+                // Добавляем в список ожидающих проверок
+                _pendingDeliveries.Add(deliveredBook);
+                UpdateDeliveriesList();
+            }
+            else
+            {
+                _deliveryTimer.Stop();
             }
         }
 
@@ -243,15 +286,13 @@ namespace BookShop
         {
             cmbGeneres.Items.Clear();
 
-            // Добавляем опцию «Все жанры» в начало списка
+            // Добавляем опцию "Все жанры" в начало списка
             cmbGeneres.Items.Add("Все жанры");
 
             var genres = _store.GetAvailableGenres();
             cmbGeneres.Items.AddRange(genres.ToArray());
             if (cmbGeneres.Items.Count > 0)
                 cmbGeneres.SelectedIndex = 0;
-
-
         }
 
         /// <summary>
@@ -415,8 +456,371 @@ namespace BookShop
         private void UpdateBalanceLabel()
         {
             lblBalance.Text = $"Баланс: {_store.Balance} руб.";
+
+            // Проверяем баланс и вызываем EndGame при необходимости
+            if (_store.Balance < 0)
+            {
+                MessageBox.Show("Баланс достиг нуля! Игра окончена.", "Игра завершена", MessageBoxButtons.OK, MessageBoxIcon.Information);//Откладка
+                EndGame(false);
+            }
         }
 
+
+        #endregion
+
+        #region Вкладка "Поставки"
+
+        /// <summary>
+        /// Метод вывода информации о доставках книг 
+        /// </summary>
+        private void UpdateDeliveriesList()
+        {
+            lstDeliveries.Items.Clear();
+            bool hasItems = false;
+
+            foreach (var book in _pendingDeliveries)
+            {
+                lstDeliveries.Items.Add($"{book.author} - «{book.title}» ({book.genre})");
+                hasItems = true;
+            }
+
+            // Проверяем наличие элементов и скрываем вкладку при необходимости
+            if (hasItems && !IsPageDeliveriesVisible)
+            {
+                tabControlMain.TabPages.Add(tabPageDeliveries);
+                IsPageDeliveriesVisible = true;
+            }
+
+            if (!hasItems && IsPageDeliveriesVisible)
+            {
+                tabControlMain.TabPages.Remove(tabPageDeliveries);
+                IsPageDeliveriesVisible = false;
+            }
+        }
+
+        /// <summary>
+        /// Метод поиска книги при нажатии на неё в ListBox
+        /// </summary>
+        private void lstDeliveries_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Проверяем, что выбран какой-то элемент
+            if (lstDeliveries.SelectedIndex == -1) return;
+
+            // Получаем текст выбранного элемента (Автор - «Название» (Жанр) #ID)
+            string selectedItem = lstDeliveries.SelectedItem.ToString();
+
+            // Извлекаем Автора и Название из строки (ищем шаблоны)
+            string book_author = ExtractAuthorFromListBoxItem(selectedItem);
+            string book_title = ExtractTitleFromListBoxItem(selectedItem);
+
+            if (book_author == string.Empty || book_title == string.Empty)
+            {
+                MessageBox.Show("Не удалось определить автора или название из выбранного элемента.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblDeliveryInfo.Text = "Доставка не найдена.";
+                lblOrderedMark.Visible = false;
+                return;
+            }
+
+            // Ищем книгу в списке ожидаемых доставок
+            var deliveryBook = _pendingDeliveries.FirstOrDefault(b => b.author == book_author && b.title == book_title);
+
+            if (deliveryBook != null)
+            {
+                // Показываем информацию о доставке
+                lblDeliveryInfo.Text = $"Доставка: {deliveryBook.title}\nАвтор: {deliveryBook.author}\nЖанр: {deliveryBook.genre}\nЦена: {deliveryBook.value}\n";
+                if (deliveryBook.order)
+                {
+                    lblOrderedMark.Visible = true;
+                    rbNormal.Visible = false;
+                    rbPlagiat.Visible = false;
+                    rbTypo.Visible = false;
+                }
+                else
+                {
+                    lblOrderedMark.Visible = false;
+                    rbNormal.Visible = true;
+                    rbPlagiat.Visible = true;
+                    rbTypo.Visible = true;
+                }
+            }
+            else
+            {
+                lblDeliveryInfo.Text = "Доставка не найдена.";
+                lblOrderedMark.Visible = false;
+                rbNormal.Visible = false;
+                rbPlagiat.Visible = false;
+                rbTypo.Visible = false;
+            }
+        }
+
+        /// <summary>
+        /// Кнопка принятия книги
+        /// </summary>
+        private void btnAccept_Click(object sender, EventArgs e)
+        {
+            // Проверяем, выбрана ли книга в списке поставок
+            if (lstDeliveries.SelectedIndex == -1)
+            {
+                MessageBox.Show("Выберите книгу из списка поставок!",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            // Получаем выбранную строку
+            string selectedItem = lstDeliveries.SelectedItem.ToString();
+
+            string author = ExtractAuthorFromListBoxItem(selectedItem);
+            string title = ExtractTitleFromListBoxItem(selectedItem);
+
+            try
+            {
+                // Ищем книгу в списке поставок
+                Book foundBook = _pendingDeliveries.Find(b => b.author == author && b.title == title);
+
+                if (foundBook == null)
+                {
+                    MessageBox.Show("Книга не найдена в поставках!",
+                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+
+                int newId = GetNextAvailableId();
+
+                // Удаляем из списка поставок
+                _pendingDeliveries.Remove(foundBook);
+                lstDeliveries.Items.Remove(selectedItem);
+
+                Book bookToAdd = new Book(GetUniqueTitle(foundBook.title, foundBook.author), foundBook.author, newId, foundBook.genre, foundBook.pageCount, foundBook.value);
+
+                // Проверяем флаг заказа
+                if (foundBook.order)
+                {
+                    bookToAdd.order = true;
+
+                    // Для заказанной книги просто добавляем в магазин
+                    if (_store.AddBook(bookToAdd))
+                    {
+                        MessageBox.Show("Книга успешно принята в магазин!",
+                            "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        UpdateDeliveriesList();
+                        lblDeliveryInfo.Text = "";
+                        lblOrderedMark.Visible = false;
+                    }
+                    else
+                    {
+                        // Если не удалось добавить, возвращаем в поставки
+                        _pendingDeliveries.Add(foundBook);
+                        lstDeliveries.Items.Add(selectedItem);
+                        MessageBox.Show("Не удалось добавить книгу в магазин",
+                            "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    // Для обычной книги сначала проверяем баланс
+                    if (_store.Balance < bookToAdd.value)
+                    {
+                        MessageBox.Show("Недостаточно средств для покупки книги!",
+                            "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                        // Возвращаем книгу в поставки
+                        _pendingDeliveries.Add(foundBook);
+                        lstDeliveries.Items.Add(selectedItem);
+                        return;
+                    }
+
+                    // Снимаем стоимость с баланса
+                    _store.UpdateBalance(-bookToAdd.value);
+                    UpdateBalanceLabel();
+
+                    // Добавляем в магазин
+                    if (_store.AddBook(bookToAdd))
+                    {
+                        if (foundBook.plag || foundBook.typo)//Если с ошибкой
+                        {
+                            MessageBox.Show($"Обнаружена ошибка! Взимается штраф {_gameSettings.Penalty}! Книга успешно принята в магазин!",
+                                            "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            _store.UpdateBalance(-_gameSettings.Penalty);
+                            UpdateBalanceLabel();
+                        }
+                        else
+                            MessageBox.Show("Книга успешно принята в магазин!",
+                                "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        lblDeliveryInfo.Text = "";
+                        rbNormal.Visible = false;
+                        rbPlagiat.Visible = false;
+                        rbTypo.Visible = false;
+                        UpdateDeliveriesList();
+                    }
+                    else
+                    {
+                        // Если не удалось добавить - возвращаем деньги
+                        _store.UpdateBalance(bookToAdd.value);
+                        UpdateBalanceLabel();
+
+                        // Возвращаем книгу в поставки
+                        _pendingDeliveries.Add(foundBook);
+                        lstDeliveries.Items.Add(selectedItem);
+                        MessageBox.Show("Не удалось добавить книгу в магазин",
+                            "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
+                // Обновляем интерфейс
+                LoadGenres();
+                cmbGenres_SelectedIndexChanged(sender, e);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex.Message}",
+                    "Критическая ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Кнопка отмены книги
+        /// </summary>
+        private void btnReject_Click(object sender, EventArgs e)
+        {
+            // Проверяем, выбрана ли книга в списке поставок
+            if (lstDeliveries.SelectedIndex == -1)
+            {
+                MessageBox.Show("Выберите книгу из списка поставок!",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            // Получаем выбранную строку
+            string selectedItem = lstDeliveries.SelectedItem.ToString();
+
+            string author = ExtractAuthorFromListBoxItem(selectedItem);
+            string title = ExtractTitleFromListBoxItem(selectedItem);
+
+            try
+            {
+                // Ищем книгу в списке поставок
+                Book foundBook = _pendingDeliveries.Find(b =>
+                    b.author == author && b.title == title);
+
+                if (foundBook == null)
+                {
+                    MessageBox.Show("Книга не найдена в поставках!",
+                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+
+                // Проверяем тип книги
+                if (foundBook.order)
+                {
+                    // Заказная книга - просто удаляем без возврата денег
+                    _pendingDeliveries.Remove(foundBook);
+
+                    MessageBox.Show("Заказанная книга успешно отклонена!",
+                                    "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    UpdateDeliveriesList();
+                    lblDeliveryInfo.Text = "";
+                    lblOrderedMark.Visible = false;
+                }
+                else
+                {
+                    // Случайная книга
+                    if (!foundBook.plag && !foundBook.typo)
+                    {
+                        // Правильная книга - просто удаляем
+                        _pendingDeliveries.Remove(foundBook);
+
+                        MessageBox.Show("Книга успешно отклонена!",
+                                        "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        lblDeliveryInfo.Text = "";
+                        rbNormal.Visible = false;
+                        rbPlagiat.Visible = false;
+                        rbTypo.Visible = false;
+                        UpdateDeliveriesList();
+                    }
+
+                    else
+                    {
+                        // Книга с ошибкой
+                        int bonus = 0;
+
+                        if (rbNormal.Checked) // Обычный отказ без выбора ошибки
+                        {
+                            bonus = _gameSettings.Bonus1;
+                        }
+                        else if (rbPlagiat.Checked)
+                        {
+                            if (foundBook.plag)//Правильно указан плагиат
+                            {
+                                bonus = _gameSettings.Bonus2;
+                            }
+                            else
+                            {
+                                bonus = _gameSettings.Bonus1;
+                            }
+                        }
+                        else if (rbTypo.Checked)
+                        {
+                            if (foundBook.typo)//Правильно указана опечатка
+                            {
+                                bonus = _gameSettings.Bonus3;
+                            }
+                            else
+                            {
+                                bonus = _gameSettings.Bonus1;
+                            }
+                        }
+
+                        // Обновляем баланс
+                        _store.UpdateBalance(bonus);
+                        UpdateBalanceLabel();
+
+                        // Удаляем книгу
+                        _pendingDeliveries.Remove(foundBook);
+
+                        MessageBox.Show($"Книга успешно отклонена! Начислено {bonus} за обнаружение ошибки!",
+                                        "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        lblDeliveryInfo.Text = "";
+                        rbNormal.Visible = false;
+                        rbPlagiat.Visible = false;
+                        rbTypo.Visible = false;
+                        UpdateDeliveriesList();
+
+                    }
+                }    
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex.Message}",
+                    "Критическая ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Метод обработки таймера появления случайной книги
+        /// </summary>
+        private void RandomBooksTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                Book randomBook = new Book();
+                randomBook.GenerateRandomBook();
+                _pendingDeliveries.Add(randomBook);
+
+                UpdateDeliveriesList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при генерации случайных книг: {ex.Message}",
+                    "Критическая ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         #endregion
 
@@ -445,7 +849,7 @@ namespace BookShop
 
         /// <summary>
         /// Вспомогательный метод для извлечения ID из конца строки элемента ListBox
-        /// Ожидаемый формат: "Автор — Название (Жанр) #123"
+        /// Ожидаемый формат: "Автор — «Название» (Жанр) #123"
         /// </summary>
         private int ExtractIdFromListBoxItem(string itemText)
         {
@@ -471,6 +875,91 @@ namespace BookShop
             }
 
             return -1;
+        }
+
+        /// <summary>
+        /// Метод для извлечения автора из строки элемента ListBox
+        /// Ожидаемый формат: "Автор — «Название» (Жанр) #123"
+        /// </summary>
+        private string ExtractAuthorFromListBoxItem(string itemText)
+        {
+            if (string.IsNullOrEmpty(itemText))
+                return string.Empty;
+
+            // Ищем разделитель " - "
+            int dashIndex = itemText.IndexOf(" - ");
+            if (dashIndex == -1)
+                return string.Empty;
+
+            // Возвращаем часть строки до разделителя
+            return itemText.Substring(0, dashIndex).Trim();
+        }
+
+        /// <summary>
+        /// Метод для извлечения названия из строки элемента ListBox
+        /// Ожидаемый формат: "Автор - «Название» (Жанр) #123"
+        /// </summary>
+        private string ExtractTitleFromListBoxItem(string itemText)
+        {
+            if (string.IsNullOrEmpty(itemText))
+                return string.Empty;
+
+            // Ищем шаблон "Автор - «Название» (Жанр) #ID"
+            int authorEndIndex = itemText.IndexOf(" - ");
+            if (authorEndIndex == -1)
+                return string.Empty;
+
+            // Ищем начало названия (после кавычки)
+            int titleStartIndex = itemText.IndexOf('«');//Alt + 0171
+            if (titleStartIndex == -1)
+                return string.Empty;
+
+            // Ищем конец названия (перед последней кавычкой)
+            int titleEndIndex = itemText.LastIndexOf('»');//Alt + 0187
+            if (titleEndIndex == -1 || titleEndIndex <= titleStartIndex)
+                return string.Empty;
+
+            // Извлекаем название с учетом всех скобок внутри
+            string title = itemText.Substring(titleStartIndex + 1, titleEndIndex - titleStartIndex - 1).Trim();
+
+            return title;
+        }
+
+        /// <summary>
+        /// Метод остановки таймеров при закрытии формы
+        /// </summary>
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // Останавливаем все таймеры при закрытии формы
+            _deliveryTimer.Stop();
+            _timerRandomBooks.Stop();
+            _gameTimer.Stop();
+            base.OnFormClosing(e);
+        }
+
+        /// <summary>
+        /// Метод обработки таймера игрового времени
+        /// </summary>
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            _elapsedTime++;
+
+            if (_elapsedTime >= _gameSettings.GameDayTime)
+            {
+                EndGame(true);
+            }
+        }
+
+        /// <summary>
+        /// Метод обработки завершения игры
+        /// </summary>
+        /// <param name="isWinner">True если победа (закончился игровой день), false - если проигрыш</param>
+        private void EndGame(bool isWinner)
+        {
+            _gameTimer.Stop();
+            MessageBox.Show("Конец игры!", "Игра завершена", MessageBoxButtons.OK, MessageBoxIcon.Information);//Откладка
+            this.Close();
+            //Здесь должен быть вызов формы "Статистика"
         }
 
         #endregion

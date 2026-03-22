@@ -14,14 +14,14 @@ namespace BookLibrary
 
         // Экономические параметры
         public float StartBalance { get; set; }
-        public float OrderDeliveryTime { get; set; }
-        public float RandomBookTime { get; set; }
-        public float CustomerTime { get; set; }
+        public float OrderDeliveryTime { get; set; }//в секундах
+        public float RandomBookTime { get; set; }//в секундах
+        public float CustomerTime { get; set; }//в секундах
 
         // Параметры игрового процесса
         public int MaxUnhappyCustomers { get; set; }
         public int MaxQueueSize { get; set; }
-        public int GameDayTime { get; set; }
+        public int GameDayTime { get; set; }//в секундах
 
         // Бонусы и штрафы
         public int Bonus1 { get; set; }  // за отклонение ошибки
@@ -61,7 +61,7 @@ namespace BookLibrary
                 case "«Лёгкий»":
                     IsEasyMode = true;
                     StartBalance = 1500;
-                    OrderDeliveryTime = 12;
+                    OrderDeliveryTime = 8;
                     RandomBookTime = 18;
                     CustomerTime = 25;
                     MaxUnhappyCustomers = 5;

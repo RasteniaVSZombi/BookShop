@@ -62,6 +62,7 @@
             lblBalance = new Label();
             lblBalanceCaption = new Label();
             tabPageDeliveries = new TabPage();
+            rbNormal = new RadioButton();
             lblOrderedMark = new Label();
             rbTypo = new RadioButton();
             rbPlagiat = new RadioButton();
@@ -80,6 +81,9 @@
             lblCustomerRequest = new Label();
             lstCustomers = new ListBox();
             errorProvider1 = new ErrorProvider(components);
+            _timerRandomBooks = new System.Windows.Forms.Timer(components);
+            _deliveryTimer = new System.Windows.Forms.Timer(components);
+            _gameTimer = new System.Windows.Forms.Timer(components);
             tabControlMain.SuspendLayout();
             tabPageOrderBook.SuspendLayout();
             tabPageStore.SuspendLayout();
@@ -125,10 +129,10 @@
             tabPageOrderBook.Controls.Add(txtTitle);
             tabPageOrderBook.Controls.Add(lblTitle);
             tabPageOrderBook.ForeColor = SystemColors.ActiveCaptionText;
-            tabPageOrderBook.Location = new Point(4, 42);
+            tabPageOrderBook.Location = new Point(4, 48);
             tabPageOrderBook.Name = "tabPageOrderBook";
             tabPageOrderBook.Padding = new Padding(3);
-            tabPageOrderBook.Size = new Size(852, 570);
+            tabPageOrderBook.Size = new Size(852, 564);
             tabPageOrderBook.TabIndex = 0;
             tabPageOrderBook.Text = "Заказать книгу";
             // 
@@ -163,7 +167,7 @@
             txtPrice.Location = new Point(180, 180);
             txtPrice.MaxLength = 10;
             txtPrice.Name = "txtPrice";
-            txtPrice.Size = new Size(100, 27);
+            txtPrice.Size = new Size(100, 31);
             txtPrice.TabIndex = 9;
             // 
             // lblPrice
@@ -171,7 +175,7 @@
             lblPrice.AutoSize = true;
             lblPrice.Location = new Point(20, 180);
             lblPrice.Name = "lblPrice";
-            lblPrice.Size = new Size(48, 20);
+            lblPrice.Size = new Size(57, 25);
             lblPrice.TabIndex = 8;
             lblPrice.Text = "Цена:";
             // 
@@ -181,7 +185,7 @@
             txtPages.Location = new Point(180, 140);
             txtPages.MaxLength = 10;
             txtPages.Name = "txtPages";
-            txtPages.Size = new Size(100, 27);
+            txtPages.Size = new Size(100, 31);
             txtPages.TabIndex = 7;
             // 
             // lblPages
@@ -189,7 +193,7 @@
             lblPages.AutoSize = true;
             lblPages.Location = new Point(20, 140);
             lblPages.Name = "lblPages";
-            lblPages.Size = new Size(122, 20);
+            lblPages.Size = new Size(145, 25);
             lblPages.TabIndex = 6;
             lblPages.Text = "Кол-во страниц:";
             // 
@@ -199,7 +203,7 @@
             txtGenre.BackColor = SystemColors.Info;
             txtGenre.Location = new Point(180, 100);
             txtGenre.Name = "txtGenre";
-            txtGenre.Size = new Size(280, 27);
+            txtGenre.Size = new Size(280, 31);
             txtGenre.TabIndex = 5;
             // 
             // lblGenre
@@ -207,7 +211,7 @@
             lblGenre.AutoSize = true;
             lblGenre.Location = new Point(20, 100);
             lblGenre.Name = "lblGenre";
-            lblGenre.Size = new Size(51, 20);
+            lblGenre.Size = new Size(62, 25);
             lblGenre.TabIndex = 4;
             lblGenre.Text = "Жанр:";
             // 
@@ -217,7 +221,7 @@
             txtAuthor.BackColor = SystemColors.Info;
             txtAuthor.Location = new Point(180, 60);
             txtAuthor.Name = "txtAuthor";
-            txtAuthor.Size = new Size(280, 27);
+            txtAuthor.Size = new Size(280, 31);
             txtAuthor.TabIndex = 3;
             // 
             // lblAuthor
@@ -225,7 +229,7 @@
             lblAuthor.AutoSize = true;
             lblAuthor.Location = new Point(20, 60);
             lblAuthor.Name = "lblAuthor";
-            lblAuthor.Size = new Size(54, 20);
+            lblAuthor.Size = new Size(67, 25);
             lblAuthor.TabIndex = 2;
             lblAuthor.Text = "Автор:";
             // 
@@ -235,7 +239,7 @@
             txtTitle.BackColor = SystemColors.Info;
             txtTitle.Location = new Point(180, 20);
             txtTitle.Name = "txtTitle";
-            txtTitle.Size = new Size(280, 27);
+            txtTitle.Size = new Size(280, 31);
             txtTitle.TabIndex = 1;
             // 
             // lblTitle
@@ -244,7 +248,7 @@
             lblTitle.ImageAlign = ContentAlignment.TopRight;
             lblTitle.Location = new Point(20, 20);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(121, 20);
+            lblTitle.Size = new Size(141, 25);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "Название книги";
             // 
@@ -253,10 +257,10 @@
             tabPageStore.BackColor = Color.BurlyWood;
             tabPageStore.Controls.Add(panelMiddle);
             tabPageStore.Controls.Add(panelTop);
-            tabPageStore.Location = new Point(4, 42);
+            tabPageStore.Location = new Point(4, 48);
             tabPageStore.Name = "tabPageStore";
             tabPageStore.Padding = new Padding(3);
-            tabPageStore.Size = new Size(852, 570);
+            tabPageStore.Size = new Size(852, 564);
             tabPageStore.TabIndex = 1;
             tabPageStore.Text = "Магазин";
             // 
@@ -267,7 +271,7 @@
             panelMiddle.Dock = DockStyle.Fill;
             panelMiddle.Location = new Point(3, 83);
             panelMiddle.Name = "panelMiddle";
-            panelMiddle.Size = new Size(846, 484);
+            panelMiddle.Size = new Size(846, 478);
             panelMiddle.TabIndex = 1;
             // 
             // panelBottom
@@ -276,7 +280,7 @@
             panelBottom.Controls.Add(lblBookInfo);
             panelBottom.Controls.Add(lblInfoCaption);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 315);
+            panelBottom.Location = new Point(0, 309);
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(846, 169);
             panelBottom.TabIndex = 2;
@@ -301,7 +305,7 @@
             lblBookInfo.AutoSize = true;
             lblBookInfo.Location = new Point(13, 41);
             lblBookInfo.Name = "lblBookInfo";
-            lblBookInfo.Size = new Size(154, 20);
+            lblBookInfo.Size = new Size(182, 25);
             lblBookInfo.TabIndex = 1;
             lblBookInfo.Text = "Здесь появиться info";
             // 
@@ -311,7 +315,7 @@
             lblInfoCaption.AutoSize = true;
             lblInfoCaption.Location = new Point(13, 9);
             lblInfoCaption.Name = "lblInfoCaption";
-            lblInfoCaption.Size = new Size(161, 20);
+            lblInfoCaption.Size = new Size(191, 25);
             lblInfoCaption.TabIndex = 0;
             lblInfoCaption.Text = "Информация о книге:";
             // 
@@ -343,10 +347,10 @@
             // 
             lstBooks.BackColor = SystemColors.Info;
             lstBooks.FormattingEnabled = true;
-            lstBooks.ItemHeight = 19;
+            lstBooks.ItemHeight = 25;
             lstBooks.Location = new Point(0, 43);
             lstBooks.Name = "lstBooks";
-            lstBooks.Size = new Size(740, 175);
+            lstBooks.Size = new Size(740, 154);
             lstBooks.TabIndex = 1;
             lstBooks.SelectedIndexChanged += lstBooks_SelectedIndexChanged;
             // 
@@ -356,7 +360,7 @@
             txtSearch.BackColor = SystemColors.Info;
             txtSearch.Location = new Point(3, 10);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(300, 27);
+            txtSearch.Size = new Size(300, 31);
             txtSearch.TabIndex = 1;
             txtSearch.Text = "Поиск по названию или ID";
             // 
@@ -381,7 +385,7 @@
             lblUnhappyCount.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblUnhappyCount.Location = new Point(200, 42);
             lblUnhappyCount.Name = "lblUnhappyCount";
-            lblUnhappyCount.Size = new Size(22, 25);
+            lblUnhappyCount.Size = new Size(26, 31);
             lblUnhappyCount.TabIndex = 5;
             lblUnhappyCount.Text = "0";
             // 
@@ -391,7 +395,7 @@
             lblUnhappyCaption.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblUnhappyCaption.Location = new Point(200, 10);
             lblUnhappyCaption.Name = "lblUnhappyCaption";
-            lblUnhappyCaption.Size = new Size(224, 21);
+            lblUnhappyCaption.Size = new Size(288, 28);
             lblUnhappyCaption.TabIndex = 4;
             lblUnhappyCaption.Text = "Неудовлетворенные клиенты:";
             // 
@@ -403,7 +407,7 @@
             cmbGeneres.FormattingEnabled = true;
             cmbGeneres.Location = new Point(519, 35);
             cmbGeneres.Name = "cmbGeneres";
-            cmbGeneres.Size = new Size(250, 27);
+            cmbGeneres.Size = new Size(250, 33);
             cmbGeneres.TabIndex = 3;
             cmbGeneres.SelectedIndexChanged += cmbGenres_SelectedIndexChanged;
             // 
@@ -413,7 +417,7 @@
             lblGenereSelect.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblGenereSelect.Location = new Point(519, 9);
             lblGenereSelect.Name = "lblGenereSelect";
-            lblGenereSelect.Size = new Size(125, 21);
+            lblGenereSelect.Size = new Size(159, 28);
             lblGenereSelect.TabIndex = 2;
             lblGenereSelect.Text = "Выберите жанр:";
             // 
@@ -423,7 +427,7 @@
             lblBalance.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblBalance.Location = new Point(20, 40);
             lblBalance.Name = "lblBalance";
-            lblBalance.Size = new Size(52, 21);
+            lblBalance.Size = new Size(66, 28);
             lblBalance.TabIndex = 1;
             lblBalance.Text = "0 руб.";
             // 
@@ -433,13 +437,14 @@
             lblBalanceCaption.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblBalanceCaption.Location = new Point(20, 10);
             lblBalanceCaption.Name = "lblBalanceCaption";
-            lblBalanceCaption.Size = new Size(132, 21);
+            lblBalanceCaption.Size = new Size(169, 28);
             lblBalanceCaption.TabIndex = 0;
             lblBalanceCaption.Text = "Баланс магазина:";
             // 
             // tabPageDeliveries
             // 
             tabPageDeliveries.BackColor = Color.BurlyWood;
+            tabPageDeliveries.Controls.Add(rbNormal);
             tabPageDeliveries.Controls.Add(lblOrderedMark);
             tabPageDeliveries.Controls.Add(rbTypo);
             tabPageDeliveries.Controls.Add(rbPlagiat);
@@ -447,19 +452,32 @@
             tabPageDeliveries.Controls.Add(btnAccept);
             tabPageDeliveries.Controls.Add(lblDeliveryInfo);
             tabPageDeliveries.Controls.Add(lstDeliveries);
-            tabPageDeliveries.Location = new Point(4, 42);
+            tabPageDeliveries.Location = new Point(4, 48);
             tabPageDeliveries.Name = "tabPageDeliveries";
             tabPageDeliveries.Padding = new Padding(3);
-            tabPageDeliveries.Size = new Size(852, 570);
+            tabPageDeliveries.Size = new Size(852, 564);
             tabPageDeliveries.TabIndex = 2;
             tabPageDeliveries.Text = "Поставки";
+            // 
+            // rbNormal
+            // 
+            rbNormal.AutoSize = true;
+            rbNormal.Checked = true;
+            rbNormal.Location = new Point(423, 360);
+            rbNormal.Name = "rbNormal";
+            rbNormal.Size = new Size(129, 29);
+            rbNormal.TabIndex = 7;
+            rbNormal.TabStop = true;
+            rbNormal.Text = "Нормально";
+            rbNormal.UseVisualStyleBackColor = true;
+            rbNormal.Visible = false;
             // 
             // lblOrderedMark
             // 
             lblOrderedMark.AutoSize = true;
-            lblOrderedMark.Location = new Point(350, 222);
+            lblOrderedMark.Location = new Point(555, 290);
             lblOrderedMark.Name = "lblOrderedMark";
-            lblOrderedMark.Size = new Size(73, 20);
+            lblOrderedMark.Size = new Size(87, 25);
             lblOrderedMark.TabIndex = 6;
             lblOrderedMark.Text = "Заказано";
             lblOrderedMark.Visible = false;
@@ -467,54 +485,56 @@
             // rbTypo
             // 
             rbTypo.AutoSize = true;
-            rbTypo.Location = new Point(470, 300);
+            rbTypo.Location = new Point(705, 360);
             rbTypo.Name = "rbTypo";
-            rbTypo.Size = new Size(92, 24);
+            rbTypo.Size = new Size(110, 29);
             rbTypo.TabIndex = 5;
-            rbTypo.TabStop = true;
             rbTypo.Text = "Опечатка";
             rbTypo.UseVisualStyleBackColor = true;
+            rbTypo.Visible = false;
             // 
             // rbPlagiat
             // 
-            rbPlagiat.AutoCheck = false;
             rbPlagiat.AutoSize = true;
-            rbPlagiat.Location = new Point(350, 300);
+            rbPlagiat.Location = new Point(587, 360);
             rbPlagiat.Name = "rbPlagiat";
-            rbPlagiat.Size = new Size(83, 24);
+            rbPlagiat.Size = new Size(97, 29);
             rbPlagiat.TabIndex = 4;
             rbPlagiat.Text = "Плагиат";
             rbPlagiat.UseVisualStyleBackColor = true;
+            rbPlagiat.Visible = false;
             // 
             // btnReject
             // 
             btnReject.BackColor = Color.Tomato;
             btnReject.FlatStyle = FlatStyle.Flat;
-            btnReject.Location = new Point(500, 250);
+            btnReject.Location = new Point(695, 443);
             btnReject.Name = "btnReject";
             btnReject.Size = new Size(120, 40);
             btnReject.TabIndex = 3;
             btnReject.Text = "Отклонить";
             btnReject.UseVisualStyleBackColor = false;
+            btnReject.Click += btnReject_Click;
             // 
             // btnAccept
             // 
             btnAccept.BackColor = Color.YellowGreen;
             btnAccept.FlatStyle = FlatStyle.Flat;
-            btnAccept.Location = new Point(350, 250);
+            btnAccept.Location = new Point(532, 443);
             btnAccept.Name = "btnAccept";
             btnAccept.Size = new Size(120, 40);
             btnAccept.TabIndex = 2;
             btnAccept.Text = "Принять";
             btnAccept.UseVisualStyleBackColor = false;
+            btnAccept.Click += btnAccept_Click;
             // 
             // lblDeliveryInfo
             // 
             lblDeliveryInfo.AutoSize = true;
             lblDeliveryInfo.BorderStyle = BorderStyle.FixedSingle;
-            lblDeliveryInfo.Location = new Point(350, 20);
+            lblDeliveryInfo.Location = new Point(16, 308);
             lblDeliveryInfo.Name = "lblDeliveryInfo";
-            lblDeliveryInfo.Size = new Size(160, 22);
+            lblDeliveryInfo.Size = new Size(189, 27);
             lblDeliveryInfo.TabIndex = 1;
             lblDeliveryInfo.Tag = "";
             lblDeliveryInfo.Text = "Информация о книге";
@@ -522,13 +542,14 @@
             // lstDeliveries
             // 
             lstDeliveries.BackColor = SystemColors.Info;
-            lstDeliveries.Dock = DockStyle.Left;
+            lstDeliveries.Dock = DockStyle.Top;
             lstDeliveries.FormattingEnabled = true;
-            lstDeliveries.ItemHeight = 19;
+            lstDeliveries.ItemHeight = 25;
             lstDeliveries.Location = new Point(3, 3);
             lstDeliveries.Name = "lstDeliveries";
-            lstDeliveries.Size = new Size(300, 564);
+            lstDeliveries.Size = new Size(846, 254);
             lstDeliveries.TabIndex = 0;
+            lstDeliveries.SelectedIndexChanged += lstDeliveries_SelectedIndexChanged;
             // 
             // tabPageCustomers
             // 
@@ -542,10 +563,10 @@
             tabPageCustomers.Controls.Add(txtCustomerSearch);
             tabPageCustomers.Controls.Add(lblCustomerRequest);
             tabPageCustomers.Controls.Add(lstCustomers);
-            tabPageCustomers.Location = new Point(4, 42);
+            tabPageCustomers.Location = new Point(4, 48);
             tabPageCustomers.Name = "tabPageCustomers";
             tabPageCustomers.Padding = new Padding(3);
-            tabPageCustomers.Size = new Size(852, 570);
+            tabPageCustomers.Size = new Size(852, 564);
             tabPageCustomers.TabIndex = 3;
             tabPageCustomers.Text = "Покупатели";
             // 
@@ -554,7 +575,7 @@
             lblQueueInfo.AutoSize = true;
             lblQueueInfo.Location = new Point(350, 270);
             lblQueueInfo.Name = "lblQueueInfo";
-            lblQueueInfo.Size = new Size(106, 20);
+            lblQueueInfo.Size = new Size(130, 25);
             lblQueueInfo.TabIndex = 8;
             lblQueueInfo.Text = "Очередь: 0 / 5";
             // 
@@ -585,7 +606,7 @@
             txtSellPrice.BackColor = SystemColors.Info;
             txtSellPrice.Location = new Point(350, 170);
             txtSellPrice.Name = "txtSellPrice";
-            txtSellPrice.Size = new Size(150, 27);
+            txtSellPrice.Size = new Size(150, 31);
             txtSellPrice.TabIndex = 5;
             // 
             // lblMaxPrice
@@ -593,7 +614,7 @@
             lblMaxPrice.AutoSize = true;
             lblMaxPrice.Location = new Point(350, 135);
             lblMaxPrice.Name = "lblMaxPrice";
-            lblMaxPrice.Size = new Size(198, 20);
+            lblMaxPrice.Size = new Size(234, 25);
             lblMaxPrice.TabIndex = 4;
             lblMaxPrice.Text = "Максимальная цена: 0 руб.";
             lblMaxPrice.Visible = false;
@@ -615,7 +636,7 @@
             txtCustomerSearch.BackColor = SystemColors.Info;
             txtCustomerSearch.Location = new Point(350, 50);
             txtCustomerSearch.Name = "txtCustomerSearch";
-            txtCustomerSearch.Size = new Size(300, 27);
+            txtCustomerSearch.Size = new Size(300, 31);
             txtCustomerSearch.TabIndex = 2;
             // 
             // lblCustomerRequest
@@ -623,7 +644,7 @@
             lblCustomerRequest.AutoSize = true;
             lblCustomerRequest.Location = new Point(350, 20);
             lblCustomerRequest.Name = "lblCustomerRequest";
-            lblCustomerRequest.Size = new Size(180, 20);
+            lblCustomerRequest.Size = new Size(211, 25);
             lblCustomerRequest.TabIndex = 1;
             lblCustomerRequest.Text = "Требование покупателя:";
             // 
@@ -632,11 +653,11 @@
             lstCustomers.BackColor = SystemColors.Info;
             lstCustomers.Dock = DockStyle.Left;
             lstCustomers.FormattingEnabled = true;
-            lstCustomers.ItemHeight = 19;
+            lstCustomers.ItemHeight = 25;
             lstCustomers.Items.AddRange(new object[] { "У Вас пока нет ни одного покупателя" });
             lstCustomers.Location = new Point(3, 3);
             lstCustomers.Name = "lstCustomers";
-            lstCustomers.Size = new Size(312, 564);
+            lstCustomers.Size = new Size(312, 558);
             lstCustomers.TabIndex = 0;
             // 
             // errorProvider1
@@ -645,7 +666,7 @@
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleDimensions = new SizeF(9F, 23F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
@@ -712,7 +733,6 @@
         private Button btnSell;
         private Label lblUnhappyCaption;
         private TabPage tabPageDeliveries;
-        private ListBox lstDeliveries;
         private Button btnAccept;
         private Label lblDeliveryInfo;
         private RadioButton rbTypo;
@@ -730,5 +750,10 @@
         private Button btnFindBook;
         private Label lblQueueInfo;
         private Button btnRefuseCustomer;
+        private System.Windows.Forms.Timer _timerRandomBooks;
+        private ListBox lstDeliveries;
+        private RadioButton rbNormal;
+        private System.Windows.Forms.Timer _deliveryTimer;
+        private System.Windows.Forms.Timer _gameTimer;
     }
 }

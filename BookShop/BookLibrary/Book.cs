@@ -18,17 +18,18 @@ namespace BookLibrary
         public string genre;      // Жанр книги
         public int pageCount;     // Количество страниц
         public float value;       // Стоимость книги
-        public bool order = false;
-        public bool plag = false;
-        public bool typo = false;
+
+        public bool order = false;//заказ
+        public bool plag = false;//плагиат
+        public bool typo = false;//опечатка
         Random random = new Random();  // Генератор случайных чисел
 
         // Диапазоны для случайной генерации
         int randomPageCountMin = 1;     // Мин. количество страниц
         int randomPageCountMax = 1000;  // Макс. количество страниц
 
-        int randomValueMin = 100;       // Мин. стоимость
-        int randomValueMax = 2000;     // Макс. стоимость
+        int randomValueMin = 50;       // Мин. стоимость
+        int randomValueMax = 800;     // Макс. стоимость
 
         /// <summary>
         /// Конструктор с параметрами
@@ -302,6 +303,10 @@ namespace BookLibrary
         {
             if (string.IsNullOrWhiteSpace(author) || string.IsNullOrWhiteSpace(title))
                 return; // Нечего добавлять
+
+            //Если книга не заказана - не добавляем
+            if (!this.order)
+                return; //Случайная книга не добавляется
 
             string booksDbFile = Path.Combine("NameData", "BooksDb.txt");
             string entryToCheck = $"{author}\t{title}";

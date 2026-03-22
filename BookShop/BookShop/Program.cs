@@ -17,7 +17,7 @@ namespace BookStore
 
             if (titleScreen.ShowDialog() == DialogResult.OK)
             {
-                // Если игрок выбрал сложность → запускаем основную форму
+                // Если игрок выбрал сложность -> запускаем основную форму
                 Application.Run(new MainForm(titleScreen._gameSettings));
             }
             else
