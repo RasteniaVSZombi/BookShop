@@ -40,12 +40,13 @@
             // 
             // btnEasy
             // 
-            btnEasy.BackColor = Color.YellowGreen;
+            btnEasy.BackColor = Color.LawnGreen;
             btnEasy.FlatStyle = FlatStyle.Flat;
-            btnEasy.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            btnEasy.Location = new Point(366, 319);
+            btnEasy.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            btnEasy.Location = new Point(320, 298);
+            btnEasy.Margin = new Padding(3, 2, 3, 2);
             btnEasy.Name = "btnEasy";
-            btnEasy.Size = new Size(299, 51);
+            btnEasy.Size = new Size(262, 38);
             btnEasy.TabIndex = 0;
             btnEasy.Text = "Легкий";
             btnEasy.UseVisualStyleBackColor = false;
@@ -54,13 +55,13 @@
             // lblDifficulty
             // 
             lblDifficulty.AutoSize = true;
-            lblDifficulty.BackColor = Color.Transparent;
+            lblDifficulty.BackColor = Color.DarkGray;
             lblDifficulty.FlatStyle = FlatStyle.Flat;
-            lblDifficulty.Font = new Font("Segoe UI Semibold", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            lblDifficulty.ForeColor = Color.OrangeRed;
-            lblDifficulty.Location = new Point(328, 272);
+            lblDifficulty.Font = new Font("Segoe UI Symbol", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            lblDifficulty.ForeColor = Color.Navy;
+            lblDifficulty.Location = new Point(285, 251);
             lblDifficulty.Name = "lblDifficulty";
-            lblDifficulty.Size = new Size(349, 31);
+            lblDifficulty.Size = new Size(308, 22);
             lblDifficulty.TabIndex = 1;
             lblDifficulty.Text = "Выберите уровень сложности:";
             // 
@@ -68,10 +69,11 @@
             // 
             btnNormal.BackColor = Color.DarkOrange;
             btnNormal.FlatStyle = FlatStyle.Flat;
-            btnNormal.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            btnNormal.Location = new Point(366, 391);
+            btnNormal.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            btnNormal.Location = new Point(320, 352);
+            btnNormal.Margin = new Padding(3, 2, 3, 2);
             btnNormal.Name = "btnNormal";
-            btnNormal.Size = new Size(299, 51);
+            btnNormal.Size = new Size(262, 38);
             btnNormal.TabIndex = 2;
             btnNormal.Text = "Нормальный";
             btnNormal.UseVisualStyleBackColor = false;
@@ -79,12 +81,13 @@
             // 
             // btnHard
             // 
-            btnHard.BackColor = Color.Crimson;
+            btnHard.BackColor = Color.Red;
             btnHard.FlatStyle = FlatStyle.Flat;
-            btnHard.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            btnHard.Location = new Point(366, 463);
+            btnHard.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            btnHard.Location = new Point(320, 406);
+            btnHard.Margin = new Padding(3, 2, 3, 2);
             btnHard.Name = "btnHard";
-            btnHard.Size = new Size(299, 51);
+            btnHard.Size = new Size(262, 38);
             btnHard.TabIndex = 3;
             btnHard.Text = "Сложный";
             btnHard.UseVisualStyleBackColor = false;
@@ -93,12 +96,12 @@
             // lblTeamName
             // 
             lblTeamName.AutoSize = true;
-            lblTeamName.BackColor = Color.Transparent;
-            lblTeamName.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            lblTeamName.ForeColor = Color.OrangeRed;
-            lblTeamName.Location = new Point(565, 625);
+            lblTeamName.BackColor = Color.DarkGray;
+            lblTeamName.Font = new Font("Showcard Gothic", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            lblTeamName.ForeColor = Color.Navy;
+            lblTeamName.Location = new Point(494, 469);
             lblTeamName.Name = "lblTeamName";
-            lblTeamName.Size = new Size(405, 28);
+            lblTeamName.Size = new Size(342, 19);
             lblTeamName.TabIndex = 4;
             lblTeamName.Text = "Команда: №2 \"Бессонные программисты";
             // 
@@ -106,10 +109,11 @@
             // 
             btnAbout.BackColor = Color.DarkTurquoise;
             btnAbout.FlatStyle = FlatStyle.Flat;
-            btnAbout.Font = new Font("Segoe UI", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            btnAbout.Font = new Font("Segoe UI", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
             btnAbout.Location = new Point(-1, 0);
+            btnAbout.Margin = new Padding(3, 2, 3, 2);
             btnAbout.Name = "btnAbout";
-            btnAbout.Size = new Size(299, 40);
+            btnAbout.Size = new Size(262, 30);
             btnAbout.TabIndex = 5;
             btnAbout.Text = "Об игре";
             btnAbout.UseVisualStyleBackColor = false;
@@ -119,23 +123,23 @@
             // 
             lblNameGame.AutoSize = true;
             lblNameGame.BackColor = Color.Transparent;
-            lblNameGame.Font = new Font("Vladimir Script", 22.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblNameGame.ForeColor = Color.OrangeRed;
-            lblNameGame.Location = new Point(114, 227);
+            lblNameGame.Font = new Font("Vladimir Script", 22.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblNameGame.ForeColor = Color.White;
+            lblNameGame.Location = new Point(38, 81);
             lblNameGame.Name = "lblNameGame";
-            lblNameGame.Size = new Size(823, 45);
+            lblNameGame.Size = new Size(715, 36);
             lblNameGame.TabIndex = 6;
             lblNameGame.Text = "Симулятор продавца в сказочной книжной лавке";
             lblNameGame.Click += lblNameGame_Click;
             // 
             // TitleScreen
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(982, 653);
+            ClientSize = new Size(859, 490);
             Controls.Add(lblNameGame);
             Controls.Add(btnAbout);
             Controls.Add(lblTeamName);
@@ -144,6 +148,7 @@
             Controls.Add(lblDifficulty);
             Controls.Add(btnEasy);
             DoubleBuffered = true;
+            Margin = new Padding(3, 2, 3, 2);
             Name = "TitleScreen";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Главное меню";
