@@ -20,19 +20,7 @@ namespace BookShop
         public TitleScreen()
         {
             InitializeComponent();
-            StyleTitleScreen();
             _gameSettings = new GameSettings();
-        }
-
-        private void StyleTitleScreen()
-        {
-            // Стилизация кнопок
-            StyleButton(btnEasy, Color.FromArgb(100, 0, 150, 0), Color.LightGreen);
-            StyleButton(btnNormal, Color.FromArgb(100, 150, 100, 0), Color.Gold);
-            StyleButton(btnHard, Color.FromArgb(100, 150, 0, 0), Color.OrangeRed);
-            StyleButton(btnAbout, Color.FromArgb(100, 50, 50, 150), Color.LightBlue);
-
-            lblTeamName.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         }
 
         private void StyleButton(Button btn, Color backColor, Color foreColor)
@@ -117,5 +105,9 @@ namespace BookShop
             );
         }
 
+        private void lblNameGame_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

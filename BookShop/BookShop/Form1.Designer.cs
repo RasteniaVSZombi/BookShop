@@ -57,8 +57,8 @@
             lblDifficulty.BackColor = Color.Transparent;
             lblDifficulty.FlatStyle = FlatStyle.Flat;
             lblDifficulty.Font = new Font("Segoe UI Semibold", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            lblDifficulty.ForeColor = Color.LavenderBlush;
-            lblDifficulty.Location = new Point(337, 272);
+            lblDifficulty.ForeColor = Color.OrangeRed;
+            lblDifficulty.Location = new Point(328, 272);
             lblDifficulty.Name = "lblDifficulty";
             lblDifficulty.Size = new Size(349, 31);
             lblDifficulty.TabIndex = 1;
@@ -95,7 +95,7 @@
             lblTeamName.AutoSize = true;
             lblTeamName.BackColor = Color.Transparent;
             lblTeamName.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            lblTeamName.ForeColor = Color.Linen;
+            lblTeamName.ForeColor = Color.OrangeRed;
             lblTeamName.Location = new Point(565, 625);
             lblTeamName.Name = "lblTeamName";
             lblTeamName.Size = new Size(405, 28);
@@ -120,12 +120,13 @@
             lblNameGame.AutoSize = true;
             lblNameGame.BackColor = Color.Transparent;
             lblNameGame.Font = new Font("Vladimir Script", 22.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblNameGame.ForeColor = Color.LavenderBlush;
-            lblNameGame.Location = new Point(90, 227);
+            lblNameGame.ForeColor = Color.OrangeRed;
+            lblNameGame.Location = new Point(114, 227);
             lblNameGame.Name = "lblNameGame";
             lblNameGame.Size = new Size(823, 45);
             lblNameGame.TabIndex = 6;
             lblNameGame.Text = "Симулятор продавца в сказочной книжной лавке";
+            lblNameGame.Click += lblNameGame_Click;
             // 
             // TitleScreen
             // 
