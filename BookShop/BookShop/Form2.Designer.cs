@@ -393,7 +393,7 @@
             // 
             lblUnhappyCaption.AutoSize = true;
             lblUnhappyCaption.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            lblUnhappyCaption.Location = new Point(200, 10);
+            lblUnhappyCaption.Location = new Point(200, 14);
             lblUnhappyCaption.Name = "lblUnhappyCaption";
             lblUnhappyCaption.Size = new Size(288, 28);
             lblUnhappyCaption.TabIndex = 4;
