@@ -130,7 +130,6 @@
             lblNameGame.Size = new Size(715, 36);
             lblNameGame.TabIndex = 6;
             lblNameGame.Text = "Симулятор продавца в сказочной книжной лавке";
-            lblNameGame.Click += lblNameGame_Click;
             // 
             // TitleScreen
             // 

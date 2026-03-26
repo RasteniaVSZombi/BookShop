@@ -24,7 +24,7 @@ namespace BookLibrary
         private List<Bookcase> _shelves;
 
         // Баланс магазина
-        private static float _balance;
+        private static decimal _balance;
 
         /// <summary>
         /// Конструктор магазина
@@ -38,14 +38,14 @@ namespace BookLibrary
 
             _maxShelves = maxShelves;
             _shelves = new List<Bookcase>();
-            _balance = 0f;
+            _balance = 0;
             _ShelfCapacity = ShelfCapacity;
         }
 
         /// <summary>
         /// Получить текущий баланс магазина
         /// </summary>
-        public float Balance
+        public decimal Balance
         {
             get => _balance;//получение текущего значения приватного поля без прямого обращения к нему
         }
@@ -64,7 +64,7 @@ namespace BookLibrary
         /// Обновить баланс магазина
         /// </summary>
         /// <param name="amount">Сумма для изменения баланса</param>
-        public void UpdateBalance(float amount)
+        public void UpdateBalance(decimal amount)
         {
             if (amount > _balance && amount < 0)
             {

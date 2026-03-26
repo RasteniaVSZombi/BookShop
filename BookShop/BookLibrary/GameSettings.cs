@@ -13,7 +13,7 @@ namespace BookLibrary
         public bool IsEasyMode { get; set; }
 
         // Экономические параметры
-        public float StartBalance { get; set; }
+        public decimal StartBalance { get; set; }
         public float OrderDeliveryTime { get; set; }//в секундах
         public float RandomBookTime { get; set; }//в секундах
         public float CustomerTime { get; set; }//в секундах

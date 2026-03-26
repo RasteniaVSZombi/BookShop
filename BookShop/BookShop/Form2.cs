@@ -30,6 +30,8 @@ namespace BookShop
         // Следующий новый ID (если нет свободных)
         private int _nextId = 1;
 
+        public int _nextCustomerId = 1; // Следующий ID покупателя
+
         //Сколько времени прошло в секундах
         private int _elapsedTime = 0;
 
@@ -40,9 +42,8 @@ namespace BookShop
         private List<Book> _pendingDeliveries = new List<Book>(); // Список поставок
 
         private List<Customer> _customersQueue = new List<Customer>(); // Очередь покупателей
-        private int _nextCustomerId = 1; // Следующий ID покупателя
         private int _unhappyCustomersCount = 0; // Счётчик недовольных покупателей
-        private System.Windows.Forms.Timer _customerTimer = new System.Windows.Forms.Timer(); // Таймер покупателей
+
         private Random _random = new Random(); // Генератор случайных чисел
 
         /// <summary>
@@ -68,316 +69,32 @@ namespace BookShop
             tabControlMain.TabPages.Remove(tabPageDeliveries);
 
             // Настройка таймеров
+            //Таймер доставки заказанной книги
             _deliveryTimer.Interval = (int)(_gameSettings.OrderDeliveryTime * 1000);//в миллисекундах
             _deliveryTimer.Tick += DeliveryTimer_Tick;
 
+            //Таймер прибытия случайной книги
             _timerRandomBooks.Interval = (int)(_gameSettings.RandomBookTime * 1000); // в миллисекундах
             _timerRandomBooks.Tick += RandomBooksTimer_Tick;
             _timerRandomBooks.Start(); // запускаем таймер при старте
 
+            //Таймер игрового времени
             _gameTimer.Interval = 1000; // интервал в 1 секунду
             _gameTimer.Tick += GameTimer_Tick;
             _gameTimer.Start(); // запускаем таймер при старте
 
-            _customerTimer.Interval = (int)(_gameSettings.CustomerTime * 1000);
+            //Таймер прихода покупателя
+            _customerTimer.Interval = (int)(_gameSettings.CustomerTime * 1000);//Интервал в 1 секунду
             _customerTimer.Tick += CustomerTimer_Tick;
-            _customerTimer.Start();
+            _customerTimer.Start();//запускаем таймер при старте
 
             UpdateCustomersUI();
-
-            lstCustomers.SelectedIndexChanged += lstCustomers_SelectedIndexChanged;
-            btnFindBook.Click += btnFindBook_Click;
-            btnSellToCustomer.Click += btnSellToCustomer_Click;
-            btnRefuseCustomer.Click += btnRefuseCustomer_Click;
 
             // Настройка стилей (User-friendly)
             this.Font = new System.Drawing.Font("Segoe UI", 10F);
             lblBalance.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             lblBalance.ForeColor = System.Drawing.Color.Green;
         }
-
-        #region Покупатели
-        private List<(string Author, string Title)> LoadBooksFromDatabase()
-        {
-            List<(string Author, string Title)> books = new List<(string Author, string Title)>();
-
-            string path = System.IO.Path.Combine(Application.StartupPath, "NameData", "BooksDb.txt");
-
-            if (!System.IO.File.Exists(path))
-                return books;
-
-            var lines = System.IO.File.ReadAllLines(path);
-
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                var parts = line.Split('\t');
-
-                if (parts.Length != 2)
-                    continue;
-
-                string author = parts[0].Trim();
-                string title = parts[1].Trim();
-
-                if (string.IsNullOrWhiteSpace(author) || string.IsNullOrWhiteSpace(title))
-                    continue;
-
-                books.Add((author, title));
-            }
-
-            return books;
-        }
-        private void CustomerTimer_Tick(object sender, EventArgs e)
-        {
-            var customer = GenerateRandomCustomer();
-            _customersQueue.Add(customer);
-
-            UpdateCustomersUI();
-            CheckQueueLimit();
-        }
-        private Customer GenerateRandomCustomer()
-        {
-            var dbBooks = LoadBooksFromDatabase();
-            bool wantsSpecificBook = _random.Next(2) == 0;
-
-            if (wantsSpecificBook && dbBooks.Count > 0)
-            {
-                var randomPair = dbBooks[_random.Next(dbBooks.Count)];
-                decimal baseBudget = _random.Next(200, 1201);
-                decimal finalLimit = baseBudget * 1.15m;
-
-                return new Customer
-                {
-                    Id = _nextCustomerId++,
-                    RequestType = CustomerRequestType.SpecificBook,
-                    RequestedTitle = randomPair.Title,
-                    RequestedAuthor = randomPair.Author,
-                    RequestedGenre = "",
-                    MaxPrice = finalLimit,
-                    IsWaitingForOrder = false
-                };
-            }
-
-            var allBooksInStore = _store.GetAllBooks();
-            var genres = allBooksInStore
-                .Select(b => b.genre)
-                .Where(g => !string.IsNullOrWhiteSpace(g))
-                .Distinct()
-                .ToList();
-
-            string randomGenre = genres.Count > 0
-                ? genres[_random.Next(genres.Count)]
-                : "Фантастика";
-
-            decimal genreBaseBudget = _random.Next(200, 1201);
-            decimal genreFinalLimit = genreBaseBudget * 1.15m;
-
-            return new Customer
-            {
-                Id = _nextCustomerId++,
-                RequestType = CustomerRequestType.Genre,
-                RequestedGenre = randomGenre,
-                MaxPrice = genreFinalLimit,
-                IsWaitingForOrder = false
-            };
-        }
-        private void UpdateCustomersUI()
-        {
-            lstCustomers.Items.Clear();
-
-            if (_customersQueue.Count == 0)
-            {
-                lstCustomers.Items.Add("У Вас пока нет ни одного покупателя");
-                lblCustomerRequest.Text = "Требование покупателя:";
-                lblMaxPrice.Text = "Максимальная цена: 0 руб.";
-                lblMaxPrice.Visible = false;
-            }
-            else
-            {
-                foreach (var customer in _customersQueue)
-                {
-                    lstCustomers.Items.Add(customer);
-                }
-            }
-
-            lblQueueInfo.Text = $"Очередь: {_customersQueue.Count} / {_gameSettings.MaxQueueSize}";
-            lblUnhappyCount.Text = _unhappyCustomersCount.ToString();
-        }
-        private void lstCustomers_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lstCustomers.SelectedItem is not Customer customer)
-                return;
-
-            if (customer.RequestType == CustomerRequestType.SpecificBook)
-            {
-                lblCustomerRequest.Text =
-                    $"Требование покупателя: {customer.RequestedTitle} — {customer.RequestedAuthor}";
-            }
-            else
-            {
-                lblCustomerRequest.Text =
-                    $"Требование покупателя: любая книга жанра {customer.RequestedGenre}";
-            }
-
-            lblMaxPrice.Text = $"Максимальная цена: {customer.MaxPrice:F2} руб.";
-            lblMaxPrice.Visible = _gameSettings.IsEasyMode;
-        }
-        private void btnFindBook_Click(object sender, EventArgs e)
-        {
-            if (lstCustomers.SelectedItem is not Customer customer)
-            {
-                MessageBox.Show("Сначала выберите покупателя.");
-                return;
-            }
-
-            var allBooks = _store.GetAllBooks();
-            Book foundBook = null;
-
-            if (customer.RequestType == CustomerRequestType.SpecificBook)
-            {
-                foundBook = allBooks.FirstOrDefault(b =>
-                    b.title.Equals(customer.RequestedTitle, StringComparison.OrdinalIgnoreCase) &&
-                    b.author.Equals(customer.RequestedAuthor, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                foundBook = allBooks.FirstOrDefault(b =>
-                    b.genre.Equals(customer.RequestedGenre, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (foundBook == null)
-            {
-                txtCustomerSearch.Text = "Книга не найдена";
-                return;
-            }
-
-            txtCustomerSearch.Text = $"{foundBook.author} — {foundBook.title} #{foundBook.id}";
-        }
-        private Book FindBookFromSearchBox()
-        {
-            string text = txtCustomerSearch.Text;
-
-            if (string.IsNullOrWhiteSpace(text) || !text.Contains("#"))
-                return null;
-
-            int hashIndex = text.LastIndexOf('#');
-            string idPart = text.Substring(hashIndex + 1).Trim();
-
-            if (!int.TryParse(idPart, out int id))
-                return null;
-
-            return _store.GetAllBooks().FirstOrDefault(b => b.id == id);
-        }
-        private bool IsBookSuitable(Customer customer, Book book)
-        {
-            if (customer.RequestType == CustomerRequestType.SpecificBook)
-            {
-                return book.title.Equals(customer.RequestedTitle, StringComparison.OrdinalIgnoreCase)
-                    && book.author.Equals(customer.RequestedAuthor, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return book.genre.Equals(customer.RequestedGenre, StringComparison.OrdinalIgnoreCase);
-        }
-        private bool IsPriceAllowed(Customer customer, float sellPrice)
-        {
-            return sellPrice <= (float)customer.MaxPrice;
-        }
-        private void btnSellToCustomer_Click(object sender, EventArgs e)
-        {
-            if (lstCustomers.SelectedItem is not Customer customer)
-            {
-                MessageBox.Show("Выберите покупателя.");
-                return;
-            }
-
-            var book = FindBookFromSearchBox();
-            if (book == null)
-            {
-                MessageBox.Show("Сначала найдите подходящую книгу.");
-                return;
-            }
-
-            if (!float.TryParse(txtSellPrice.Text, out float enteredPrice) || enteredPrice <= 0)
-            {
-                MessageBox.Show("Введите корректную цену.");
-                return;
-            }
-
-            if (!IsPriceAllowed(customer, enteredPrice))
-            {
-                MakeCustomerUnhappy(customer, "Покупатель отказался: цена слишком высокая.");
-                return;
-            }
-
-            if (!IsBookSuitable(customer, book))
-            {
-                MakeCustomerUnhappy(customer, "Покупатель отказался: книга не подходит.");
-                return;
-            }
-
-            bool sold = _store.SellBookById(book.id);
-            if (!sold)
-            {
-                MessageBox.Show("Не удалось продать книгу.");
-                return;
-            }
-
-            _store.UpdateBalance(enteredPrice);
-            UpdateBalanceLabel();
-
-            _customersQueue.Remove(customer);
-
-            txtCustomerSearch.Clear();
-            txtSellPrice.Clear();
-
-            UpdateCustomersUI();
-
-            MessageBox.Show("Книга успешно продана покупателю.");
-        }
-        private void MakeCustomerUnhappy(Customer customer, string message)
-        {
-            _unhappyCustomersCount++;
-            _customersQueue.Remove(customer);
-
-            txtCustomerSearch.Clear();
-            txtSellPrice.Clear();
-
-            UpdateCustomersUI();
-            CheckUnhappyLimit();
-
-            MessageBox.Show(message);
-        }
-        private void btnRefuseCustomer_Click(object sender, EventArgs e)
-        {
-            if (lstCustomers.SelectedItem is not Customer customer)
-            {
-                MessageBox.Show("Выберите покупателя.");
-                return;
-            }
-
-            MakeCustomerUnhappy(customer, "Вы отказали покупателю в продаже.");
-        }
-        private void CheckQueueLimit()
-        {
-            if (_customersQueue.Count >= _gameSettings.MaxQueueSize)
-            {
-                MessageBox.Show("Очередь покупателей стала слишком большой. Вы проиграли.");
-                EndGame(false);
-            }
-        }
-        private void CheckUnhappyLimit()
-
-        {
-            if (_unhappyCustomersCount >= _gameSettings.MaxUnhappyCustomers)
-            {
-                MessageBox.Show("Слишком много неудовлетворённых покупателей. Вы проиграли.");
-                EndGame(false);
-            }
-        }
-
-        #endregion Покупатели
 
         #region Вкладка "Новая книга"
 
@@ -469,7 +186,7 @@ namespace BookShop
                 errorProvider1.SetError(txtGenre, "Жанр обязателен");
             if (!int.TryParse(txtPages.Text, out int pages) || pages <= 0)
                 errorProvider1.SetError(txtPages, "Некорректное кол-во страниц");
-            if (!float.TryParse(txtPrice.Text, out float price) || price <= 0)
+            if (!decimal.TryParse(txtPrice.Text, out decimal price) || price <= 0)
                 errorProvider1.SetError(txtPrice, "Некорректная цена");
 
             if (errorProvider1.GetError(txtTitle) != "" || errorProvider1.GetError(txtAuthor) != "" ||
@@ -964,6 +681,7 @@ namespace BookShop
                         // Возвращаем книгу в поставки
                         _pendingDeliveries.Add(foundBook);
                         lstDeliveries.Items.Add(selectedItem);
+                        UpdateDeliveriesList();
                         MessageBox.Show("Не удалось добавить книгу в магазин",
                             "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
@@ -1123,6 +841,278 @@ namespace BookShop
 
         #endregion
 
+        #region Вкладка "Покупатели"
+
+        /// <summary>
+        /// Метод обработки таймера прихода покупателя
+        /// </summary>
+        private void CustomerTimer_Tick(object sender, EventArgs e)
+        {
+            Customer customer = new Customer(_nextCustomerId++);
+            customer.GenerateRandomCustomer();
+            _customersQueue.Add(customer);
+
+            UpdateCustomersUI();
+            CheckQueueLimit();
+        }
+
+        /// <summary>
+        /// Метод обновления интерфейса "Покупатели"
+        /// </summary>
+        private void UpdateCustomersUI()
+        {
+            lstCustomers.Items.Clear();
+
+            if (_customersQueue.Count == 0)
+            {
+                lstCustomers.Items.Add("У Вас пока нет ни одного покупателя");
+                lblCustomerRequest.Text = "Требование покупателя:";
+                lblSellPrice.Text = "Цена книги: 0 руб.";
+                lblMaxPrice.Text = "Максимальная цена: 0 руб.";
+                lblMaxPrice.Visible = false;
+                lblSellPrice.Visible = false;
+            }
+            else
+            {
+                foreach (var customer in _customersQueue)
+                {
+                    lstCustomers.Items.Add(customer);
+                }
+            }
+
+            lblQueueInfo.Text = $"Очередь: {_customersQueue.Count} / {_gameSettings.MaxQueueSize}";
+            lblUnhappyCount.Text = _unhappyCustomersCount.ToString();
+        }
+
+        /// <summary>
+        /// Метод вывода информации о покупателе при выборе в ListBox
+        /// </summary>
+        private void lstCustomers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstCustomers.SelectedItem is not Customer customer)
+                return;
+
+            if (customer.RequestType == CustomerRequestType.SpecificBook)
+            {
+                lblCustomerRequest.Text = $"Требование покупателя:\n{customer.RequestedTitle} — {customer.RequestedAuthor}";
+            }
+            else
+            {
+                lblCustomerRequest.Text = $"Требование покупателя:\nлюбая книга жанра {customer.RequestedGenre}";
+            }
+        }
+
+        /// <summary>
+        /// Кнопка нахождения книги для продажи покупателю
+        /// </summary>
+        private void btnFindBook_Click(object sender, EventArgs e)
+        {
+            if (lstCustomers.SelectedItem is not Customer customer)
+            {
+                MessageBox.Show("Сначала выберите покупателя.");
+                return;
+            }
+
+            var allBooks = _store.GetAllBooks();
+            Book foundBook = null;
+
+            if (customer.RequestType == CustomerRequestType.SpecificBook)
+            {
+                foundBook = allBooks.FirstOrDefault(b =>
+                    b.title.Equals(customer.RequestedTitle, StringComparison.OrdinalIgnoreCase) &&
+                    b.author.Equals(customer.RequestedAuthor, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                foundBook = allBooks.FirstOrDefault(b =>
+                    b.genre.Equals(customer.RequestedGenre, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (foundBook == null)
+            {
+                txtCustomerSearch.Text = "Книга не найдена";
+                return;
+            }
+
+            decimal MaxPrice = (decimal)foundBook.value * 1.15m;
+
+            lblSellPrice.Visible = true;
+            txtCustomerSearch.Text = $"{foundBook.author} — {foundBook.title} #{foundBook.id}";
+            lblSellPrice.Text = $"Цена книги: {foundBook.value:F2}";
+            lblMaxPrice.Text = $"Максимальная цена: {MaxPrice:F2} руб.";
+            lblMaxPrice.Visible = _gameSettings.IsEasyMode;
+        }
+
+        /// <summary>
+        /// Метод изъятия книги из SearchBox
+        /// </summary>
+        /// <returns>найденная по id книга</returns>
+        private Book FindBookFromSearchBox()
+        {
+            string text = txtCustomerSearch.Text;
+
+            if (string.IsNullOrWhiteSpace(text) || !text.Contains("#"))
+                return null;
+
+            int hashIndex = text.LastIndexOf('#');
+            string idPart = text.Substring(hashIndex + 1).Trim();
+
+            if (!int.TryParse(idPart, out int id))
+                return null;
+
+            return _store.GetAllBooks().FirstOrDefault(b => b.id == id);
+        }
+
+        /// <summary>
+        /// Метод проверки соответствия книги желанию покупателя
+        /// </summary>
+        /// <param name="customer">покупатель</param>
+        /// <param name="book">книга для продажи</param>
+        /// <returns>True при соответствии пожеланиям</returns>
+        private bool IsBookSuitable(Customer customer, Book book)
+        {
+            if (customer.RequestType == CustomerRequestType.SpecificBook)
+            {
+                return book.title.Equals(customer.RequestedTitle, StringComparison.OrdinalIgnoreCase)
+                    && book.author.Equals(customer.RequestedAuthor, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return book.genre.Equals(customer.RequestedGenre, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Метод проверки стоимости книги желанию покупателя
+        /// </summary>
+        /// <param name="customer">покупатель</param>
+        /// <param name="book">книга</param>
+        /// <param name="sellPrice">стоимость книги</param>
+        /// <returns>True если покупатель готов купить книгу по такой стоимости</returns>
+        private bool IsPriceAllowed(Customer customer, Book book, decimal sellPrice)
+        {
+            decimal MaxPrice = (decimal)book.value * 1.15m;//Цена с наценкой 15% - максимальная стоимость книги
+
+            return sellPrice <= MaxPrice;
+        }
+
+        /// <summary>
+        /// Кнопка продажи книги покупателю
+        /// </summary>
+        private void btnSellToCustomer_Click(object sender, EventArgs e)
+        {
+            if (lstCustomers.SelectedItem is not Customer customer)
+            {
+                MessageBox.Show("Выберите покупателя.");
+                return;
+            }
+
+            var book = FindBookFromSearchBox();
+
+            if (book == null)
+            {
+                MessageBox.Show("Сначала найдите подходящую книгу.");
+                return;
+            }
+
+            if (!decimal.TryParse(txtSellPrice.Text, out decimal enteredPrice) || enteredPrice <= 0)
+            {
+                MessageBox.Show("Введите корректную цену.");
+                return;
+            }
+
+            if (!IsPriceAllowed(customer, book, enteredPrice))
+            {
+                MakeCustomerUnhappy(customer, "Покупатель отказался: цена слишком высокая.");
+                return;
+            }
+
+            if (!IsBookSuitable(customer, book))
+            {
+                MakeCustomerUnhappy(customer, "Покупатель отказался: книга не подходит.");
+                return;
+            }
+
+            bool sold = _store.SellBookById(book.id);
+            if (!sold)
+            {
+                MessageBox.Show("Не удалось продать книгу.");
+                return;
+            }
+
+            //Обновляем баланс
+            _store.UpdateBalance(enteredPrice);
+            UpdateBalanceLabel();
+
+            _customersQueue.Remove(customer);
+
+            txtCustomerSearch.Clear();
+            txtSellPrice.Clear();
+
+            LoadGenres();
+            cmbGenres_SelectedIndexChanged(sender, e);
+            UpdateCustomersUI();
+
+            MessageBox.Show("Книга успешно продана покупателю.");
+        }
+
+        /// <summary>
+        /// Метод обработки недовольного покупателя
+        /// </summary>
+        /// <param name="customer">покупатель</param>
+        /// <param name="message">сообщение - причина недовольности</param>
+        private void MakeCustomerUnhappy(Customer customer, string message)
+        {
+            _unhappyCustomersCount++;
+            _customersQueue.Remove(customer);
+
+            txtCustomerSearch.Clear();
+            txtSellPrice.Clear();
+
+            UpdateCustomersUI();
+            CheckUnhappyLimit();
+
+            MessageBox.Show(message);
+        }
+
+        /// <summary>
+        /// Кнопка отказа покупателю
+        /// </summary>
+        private void btnRefuseCustomer_Click(object sender, EventArgs e)
+        {
+            if (lstCustomers.SelectedItem is not Customer customer)
+            {
+                MessageBox.Show("Выберите покупателя.");
+                return;
+            }
+
+            MakeCustomerUnhappy(customer, "Вы отказали покупателю в продаже.");
+        }
+
+        /// <summary>
+        /// Метод проверки очереди
+        /// </summary>
+        private void CheckQueueLimit()
+        {
+            if (_customersQueue.Count >= _gameSettings.MaxQueueSize)
+            {
+                MessageBox.Show("Очередь покупателей стала слишком большой. Вы проиграли.");
+                EndGame(false);
+            }
+        }
+
+        /// <summary>
+        /// Метод проверки количества неудовлетворённых покупателей
+        /// </summary>
+        private void CheckUnhappyLimit()
+        {
+            if (_unhappyCustomersCount >= _gameSettings.MaxUnhappyCustomers)
+            {
+                MessageBox.Show("Слишком много неудовлетворённых покупателей. Вы проиграли.");
+                EndGame(false);
+            }
+        }
+
+        #endregion Покупатели
+
         #region Дополнительные методы_помощники
 
         /// <summary>
@@ -1257,8 +1247,18 @@ namespace BookShop
         {
             _gameTimer.Stop();
             MessageBox.Show("Конец игры!", "Игра завершена", MessageBoxButtons.OK, MessageBoxIcon.Information);//Откладка
+
+            // Создаём форму завершения игры с передачей параметров
+            FormEndGame endGameForm = new FormEndGame(_gameSettings, isWinner);
+
+            this.Hide();//Скрываем текущую форму
+
+            // Открываем новую форму в модальном режиме
+            endGameForm.ShowDialog();
+
+            // Закрываем текущую форму после того, как FormEndGame будет закрыта
             this.Close();
-            //Здесь должен быть вызов формы "Статистика"
+
         }
 
         #endregion

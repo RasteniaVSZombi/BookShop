@@ -17,7 +17,7 @@ namespace BookLibrary
         public int id;            // Уникальный идентификатор
         public string genre;      // Жанр книги
         public int pageCount;     // Количество страниц
-        public float value;       // Стоимость книги
+        public decimal value;       // Стоимость книги
 
         public bool order = false;//заказ
         public bool plag = false;//плагиат
@@ -40,7 +40,7 @@ namespace BookLibrary
         /// <param name="genre">Жанр книги</param>
         /// <param name="pageCount">Количество страниц</param>
         /// <param name="value">Стоимость книги</param>
-        public Book(string title, string author, int id, string genre, int pageCount, float value)
+        public Book(string title, string author, int id, string genre, int pageCount, decimal value)
         {
             // Инициализация каждого поля 
             this.title = title;

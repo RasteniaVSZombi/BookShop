@@ -104,10 +104,5 @@ namespace BookShop
                 MessageBoxIcon.Information
             );
         }
-
-        private void lblNameGame_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
