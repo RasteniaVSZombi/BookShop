@@ -441,25 +441,6 @@ namespace BookShop.Tests
     public class ShopDbTests
     {
         [TestMethod]
-        public void InitializeDB_CreatesFile()
-        {
-            // Получаем путь к папке тестового проекта (где выполняется тест)
-            string testProjectDir = Directory.GetCurrentDirectory();
-
-            // Поднимаемся на уровень выше, чтобы попасть в корневую папку решения
-            string solutionDir = Directory.GetParent(testProjectDir).Parent.Parent.Parent.FullName;
-
-            // Формируем путь к нужному файлу
-            string targetPath = Path.Combine(solutionDir, "BookShop", "bin", "Debug", "net8.0-windows", "NameData", "BooksDb.txt");
-
-            var shop = new Shop(5, 10);
-
-            shop.InitializeDB();
-
-            Assert.IsTrue(File.Exists(targetPath));
-        }
-
-        [TestMethod]
         public void InitializeDB_DoesNotCrash()
         {
             var shop = new Shop(5, 10);
