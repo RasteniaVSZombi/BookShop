@@ -2,6 +2,8 @@
 using BookLibrary;
 using System;
 using System.Linq;
+using Microsoft.VisualBasic;
+using System.Windows.Forms;
 
 namespace BookShop.Tests
 {
@@ -441,11 +443,20 @@ namespace BookShop.Tests
         [TestMethod]
         public void InitializeDB_CreatesFile()
         {
+            // Получаем путь к папке тестового проекта (где выполняется тест)
+            string testProjectDir = Directory.GetCurrentDirectory();
+
+            // Поднимаемся на уровень выше, чтобы попасть в корневую папку решения
+            string solutionDir = Directory.GetParent(testProjectDir).Parent.Parent.Parent.FullName;
+
+            // Формируем путь к нужному файлу
+            string targetPath = Path.Combine(solutionDir, "BookShop", "bin", "Debug", "net8.0-windows", "NameData", "BooksDb.txt");
+
             var shop = new Shop(5, 10);
 
             shop.InitializeDB();
 
-            Assert.IsTrue(File.Exists(Path.Combine("NameData", "BooksDb.txt")));
+            Assert.IsTrue(File.Exists(targetPath));
         }
 
         [TestMethod]
