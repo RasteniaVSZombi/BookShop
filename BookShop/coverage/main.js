@@ -290,17 +290,21 @@ var assemblies = [
   {
     "name": "BookLibrary",
     "classes": [
-      { "name": "BookLibrary.Book", "rp": "BookLibrary_Book.html", "cl": 63, "ucl": 4, "cal": 67, "tl": 134, "cb": 3, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "BookLibrary.Bookcase", "rp": "BookLibrary_Bookcase.html", "cl": 36, "ucl": 2, "cal": 38, "tl": 106, "cb": 12, "tb": 14, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "BookLibrary.Shop", "rp": "BookLibrary_Shop.html", "cl": 114, "ucl": 48, "cal": 162, "tl": 342, "cb": 36, "tb": 58, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookLibrary.Book", "rp": "BookLibrary_Book.html", "cl": 71, "ucl": 132, "cal": 203, "tl": 373, "cb": 13, "tb": 56, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookLibrary.Bookcase", "rp": "BookLibrary_Bookcase.html", "cl": 47, "ucl": 14, "cal": 61, "tl": 154, "cb": 17, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookLibrary.Customer", "rp": "BookLibrary_Customer.html", "cl": 46, "ucl": 11, "cal": 57, "tl": 121, "cb": 14, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookLibrary.GameSettings", "rp": "BookLibrary_GameSettings.html", "cl": 63, "ucl": 2, "cal": 65, "tl": 102, "cb": 5, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookLibrary.Shop", "rp": "BookLibrary_Shop.html", "cl": 130, "ucl": 44, "cal": 174, "tl": 348, "cb": 39, "tb": 60, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "BookShop",
     "classes": [
-      { "name": "BookShop.MainForm", "rp": "BookShop_MainForm.html", "cl": 0, "ucl": 460, "cal": 460, "tl": 758, "cb": 0, "tb": 60, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookShop.FormEndGame", "rp": "BookShop_FormEndGame.html", "cl": 0, "ucl": 23, "cal": 23, "tl": 83, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookShop.MainForm", "rp": "BookShop_MainForm.html", "cl": 0, "ucl": 1269, "cal": 1269, "tl": 2044, "cb": 0, "tb": 226, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "BookShop.Properties.Resources", "rp": "BookShop_Resources.html", "cl": 0, "ucl": 15, "cal": 15, "tl": 63, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookShop.TitleScreen", "rp": "BookShop_TitleScreen.html", "cl": 0, "ucl": 184, "cal": 184, "tl": 276, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "BookStore.ApplicationConfiguration", "rp": "BookShop_ApplicationConfiguration.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "BookStore.Program", "rp": "BookShop_Program.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "BookStore.Program", "rp": "BookShop_Program.html", "cl": 0, "ucl": 11, "cal": 11, "tl": 31, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -315,37 +319,115 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnAddBook_Click(System.Object,System.EventArgs)", "methodShortName": "btnAddBook_Click(...)", "fileIndex": 0, "line": 116,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnAddBook_Click(System.Object,System.EventArgs)", "methodShortName": "btnAddBook_Click(...)", "fileIndex": 0, "line": 176,
     "metrics": [
-      { "value": 600, "exceeded": true },
-      { "value": 24, "exceeded": true },
+      { "value": 1482, "exceeded": true },
+      { "value": 38, "exceeded": true },
     ]},
   {
-    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "cmbGenres_SelectedIndexChanged(System.Object,System.EventArgs)", "methodShortName": "cmbGenres_SelectedIndexChanged(...)", "fileIndex": 0, "line": 188,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnReject_Click(System.Object,System.EventArgs)", "methodShortName": "btnReject_Click(...)", "fileIndex": 0, "line": 705,
+    "metrics": [
+      { "value": 506, "exceeded": true },
+      { "value": 22, "exceeded": true },
+    ]},
+  {
+    "assembly": "BookLibrary", "class": "BookLibrary.Book", "reportPath": "BookLibrary_Book.html", "methodName": "GenerateRandomBook()", "methodShortName": "GenerateRandomBook()", "fileIndex": 0, "line": 142,
+    "metrics": [
+      { "value": 420, "exceeded": true },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "BookLibrary", "class": "BookLibrary.Book", "reportPath": "BookLibrary_Book.html", "methodName": "AddToDB()", "methodShortName": "AddToDB()", "fileIndex": 0, "line": 303,
+    "metrics": [
+      { "value": 343, "exceeded": true },
+      { "value": 22, "exceeded": true },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnAccept_Click(System.Object,System.EventArgs)", "methodShortName": "btnAccept_Click(...)", "fileIndex": 0, "line": 576,
+    "metrics": [
+      { "value": 342, "exceeded": true },
+      { "value": 18, "exceeded": true },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnSellToCustomer_Click(System.Object,System.EventArgs)", "methodShortName": "btnSellToCustomer_Click(...)", "fileIndex": 0, "line": 1001,
+    "metrics": [
+      { "value": 210, "exceeded": true },
+      { "value": 14, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "lstDeliveries_SelectedIndexChanged(System.Object,System.EventArgs)", "methodShortName": "lstDeliveries_SelectedIndexChanged(...)", "fileIndex": 0, "line": 521,
+    "metrics": [
+      { "value": 156, "exceeded": true },
+      { "value": 12, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "UpdateDeliveriesList()", "methodShortName": "UpdateDeliveriesList()", "fileIndex": 0, "line": 493,
+    "metrics": [
+      { "value": 110, "exceeded": true },
+      { "value": 10, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "ExtractIdFromListBoxItem(System.String)", "methodShortName": "ExtractIdFromListBoxItem(...)", "fileIndex": 0, "line": 1143,
+    "metrics": [
+      { "value": 110, "exceeded": true },
+      { "value": 10, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "ExtractTitleFromListBoxItem(System.String)", "methodShortName": "ExtractTitleFromListBoxItem(...)", "fileIndex": 0, "line": 1191,
+    "metrics": [
+      { "value": 110, "exceeded": true },
+      { "value": 10, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookLibrary", "class": "BookLibrary.Shop", "reportPath": "BookLibrary_Shop.html", "methodName": "AddBook(BookLibrary.Book)", "methodShortName": "AddBook(...)", "fileIndex": 0, "line": 143,
+    "metrics": [
+      { "value": 76, "exceeded": true },
+      { "value": 16, "exceeded": true },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "IsTitleExists(System.String,System.String)", "methodShortName": "IsTitleExists(...)", "fileIndex": 0, "line": 160,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "BookLibrary", "class": "BookLibrary.Shop", "reportPath": "BookLibrary_Shop.html", "methodName": "FindBook(System.String,System.String)", "methodShortName": "FindBook(...)", "fileIndex": 0, "line": 226,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "cmbGenres_SelectedIndexChanged(System.Object,System.EventArgs)", "methodShortName": "cmbGenres_SelectedIndexChanged(...)", "fileIndex": 0, "line": 318,
     "metrics": [
-      { "value": 48, "exceeded": true },
-      { "value": 20, "exceeded": true },
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "IsTitleExists(System.String)", "methodShortName": "IsTitleExists(...)", "fileIndex": 0, "line": 100,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "lstBooks_SelectedIndexChanged(System.Object,System.EventArgs)", "methodShortName": "lstBooks_SelectedIndexChanged(...)", "fileIndex": 0, "line": 385,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnFindBook_Click(System.Object,System.EventArgs)", "methodShortName": "btnFindBook_Click(...)", "fileIndex": 0, "line": 909,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "GetUniqueTitle(System.String,System.String)", "methodShortName": "GetUniqueTitle(...)", "fileIndex": 0, "line": 128,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnSearch_Click(System.Object,System.EventArgs)", "methodShortName": "btnSearch_Click(...)", "fileIndex": 0, "line": 220,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnSearch_Click(System.Object,System.EventArgs)", "methodShortName": "btnSearch_Click(...)", "fileIndex": 0, "line": 350,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnSell_Click(System.Object,System.EventArgs)", "methodShortName": "btnSell_Click(...)", "fileIndex": 0, "line": 255,
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "btnSell_Click(System.Object,System.EventArgs)", "methodShortName": "btnSell_Click(...)", "fileIndex": 0, "line": 435,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "BookShop", "class": "BookShop.MainForm", "reportPath": "BookShop_MainForm.html", "methodName": "FindBookFromSearchBox()", "methodShortName": "FindBookFromSearchBox()", "fileIndex": 0, "line": 951,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },

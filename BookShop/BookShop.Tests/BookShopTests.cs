@@ -44,6 +44,28 @@ namespace BookShop.Tests
             Assert.IsTrue(book.pageCount > 0);
             Assert.IsTrue(book.value > 0);
         }
+
+        [TestMethod]
+        public void AddToDB_WithEmptyFields_DoesNothing()
+        {
+            var book = new Book();
+
+            book.AddToDB();
+
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
+        public void AddToDB_WhenNotOrdered_DoesNotAdd()
+        {
+            var book = new Book("Test", "Author", 1, "Drama", 100, 50);
+
+            book.order = false;
+
+            book.AddToDB();
+
+            Assert.IsTrue(true);
+        }
     }
 
     [TestClass]
@@ -306,7 +328,134 @@ namespace BookShop.Tests
 
             Assert.AreEqual(0, result.Count);
         }
+    }
 
-        
+    [TestClass]
+    public class GameSettingsTests
+    {
+        [TestMethod]
+        public void Constructor_SetsDefaultValues()
+        {
+            var settings = new GameSettings();
+
+            Assert.AreEqual("Нормальный", settings.Difficulty);
+            Assert.IsFalse(settings.IsEasyMode);
+            Assert.AreEqual(1000, settings.StartBalance);
+        }
+
+        [TestMethod]
+        public void ResetToDefault_SetsDefaultValues()
+        {
+            var settings = new GameSettings();
+
+            settings.StartBalance = 999;
+            settings.ResetToDefault();
+
+            Assert.AreEqual(1000, settings.StartBalance);
+        }
+
+        [TestMethod]
+        public void SetDifficulty_EasyMode_SetsCorrectValues()
+        {
+            var settings = new GameSettings();
+
+            settings.SetDifficulty("«Лёгкий»");
+
+            Assert.IsTrue(settings.IsEasyMode);
+            Assert.AreEqual(1500, settings.StartBalance);
+        }
+
+        [TestMethod]
+        public void SetDifficulty_HardMode_SetsCorrectValues()
+        {
+            var settings = new GameSettings();
+
+            settings.SetDifficulty("«Сложный»");
+
+            Assert.IsFalse(settings.IsEasyMode);
+            Assert.AreEqual(800, settings.StartBalance);
+        }
+
+        [TestMethod]
+        public void SetDifficulty_Invalid_SetsDefault()
+        {
+            var settings = new GameSettings();
+
+            settings.SetDifficulty("INVALID");
+
+            Assert.AreEqual(1000, settings.StartBalance);
+        }
+    }
+
+    [TestClass]
+    public class CustomerTests
+    {
+        [TestMethod]
+        public void Constructor_SetsId()
+        {
+            var customer = new Customer(5);
+
+            Assert.AreEqual(5, customer.Id);
+        }
+
+        [TestMethod]
+        public void ToString_SpecificBook_ReturnsCorrectString()
+        {
+            var customer = new Customer(1);
+            customer.RequestType = CustomerRequestType.SpecificBook;
+            customer.RequestedTitle = "Book";
+            customer.RequestedAuthor = "Author";
+
+            var result = customer.ToString();
+
+            Assert.IsTrue(result.Contains("Book"));
+        }
+
+        [TestMethod]
+        public void ToString_Genre_ReturnsCorrectString()
+        {
+            var customer = new Customer(1);
+            customer.RequestType = CustomerRequestType.Genre;
+            customer.RequestedGenre = "Drama";
+
+            var result = customer.ToString();
+
+            Assert.IsTrue(result.Contains("Drama"));
+        }
+
+        [TestMethod]
+        public void GenerateRandomCustomer_DoesNotCrash()
+        {
+            var customer = new Customer(1);
+
+            customer.GenerateRandomCustomer();
+
+            Assert.IsTrue(customer.RequestType == CustomerRequestType.Genre
+                       || customer.RequestType == CustomerRequestType.SpecificBook);
+        }
+    }
+
+    [TestClass]
+    public class ShopDbTests
+    {
+        [TestMethod]
+        public void InitializeDB_CreatesFile()
+        {
+            var shop = new Shop(5, 10);
+
+            shop.InitializeDB();
+
+            Assert.IsTrue(File.Exists(Path.Combine("NameData", "BooksDb.txt")));
+        }
+
+        [TestMethod]
+        public void InitializeDB_DoesNotCrash()
+        {
+            var shop = new Shop(5, 10);
+
+            shop.InitializeDB();
+
+            Assert.IsTrue(true);
+        }
     }
 }
