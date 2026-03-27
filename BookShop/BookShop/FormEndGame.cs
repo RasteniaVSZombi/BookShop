@@ -13,22 +13,39 @@ namespace BookShop
 {
     public partial class FormEndGame : Form
     {
-        private GameSettings _gameSettings;
-        private bool _isWinner;
-
         /// <summary>
         /// Конструктор формы завершения игры
         /// </summary>
         /// <param name="gameSettings">Настройки игры</param>
-        /// <param name="isWinner">True — победа, False — проигрыш</param>
-        public FormEndGame(GameSettings gameSettings, bool isWinner)
+        /// <param name="isWinner">True — победа, False — поражение</param>
+        /// <param name="elapsedTime">пройденное время</param>
+        /// <param name="_store">магазин</param>
+        /// <param name="unhappyCustomers">количество недовольных покупателей</param>
+        /// <param name="QueueSize">очередь</param>
+        public FormEndGame(GameSettings gameSettings, bool isWinner, int elapsedTime, Shop _store, int unhappyCustomers, int QueueSize)
         {
             InitializeComponent(); // Инициализация компонентов формы
 
-            // Сохраняем переданные данные
-            _gameSettings = gameSettings;
-            _isWinner = isWinner;
+            phonoWin.Visible = false;
+            photoLose.Visible = false;
 
+            if(isWinner)
+            {
+                phonoWin.Visible = true;
+                photoLose.Visible = false;
+            }
+            else
+            {
+                photoLose.Visible = true;
+                phonoWin.Visible = false;
+            }
+
+            lbStats.Text = $"Статистика:\n" +
+                $"Сложность: {gameSettings.Difficulty}\n" +
+                $"Прошло игрового времени: {elapsedTime} / {gameSettings.GameDayTime}\n" +
+                $"Оставшийся баланс магазина: {_store.Balance}\n" +
+                $"Недовольных покупателей: {unhappyCustomers} / {gameSettings.MaxUnhappyCustomers}\n" +
+                $"Очередь: {QueueSize} / {gameSettings.MaxQueueSize}\n";
 
         }
 

@@ -1094,6 +1094,7 @@ namespace BookShop
         {
             if (_customersQueue.Count >= _gameSettings.MaxQueueSize)
             {
+                _customerTimer.Stop();
                 MessageBox.Show("Очередь покупателей стала слишком большой. Вы проиграли.");
                 EndGame(false);
             }
@@ -1106,6 +1107,7 @@ namespace BookShop
         {
             if (_unhappyCustomersCount >= _gameSettings.MaxUnhappyCustomers)
             {
+                _customerTimer.Stop();
                 MessageBox.Show("Слишком много неудовлетворённых покупателей. Вы проиграли.");
                 EndGame(false);
             }
@@ -1245,11 +1247,14 @@ namespace BookShop
         /// <param name="isWinner">True если победа (закончился игровой день), false - если проигрыш</param>
         private void EndGame(bool isWinner)
         {
+            _deliveryTimer.Stop();
+            _timerRandomBooks.Stop();
             _gameTimer.Stop();
+            _customerTimer.Stop();
             MessageBox.Show("Конец игры!", "Игра завершена", MessageBoxButtons.OK, MessageBoxIcon.Information);//Откладка
 
             // Создаём форму завершения игры с передачей параметров
-            FormEndGame endGameForm = new FormEndGame(_gameSettings, isWinner);
+            FormEndGame endGameForm = new FormEndGame(_gameSettings, isWinner, _elapsedTime, _store, _unhappyCustomersCount, _customersQueue.Count);
 
             this.Hide();//Скрываем текущую форму
 

@@ -305,9 +305,10 @@
             // 
             lblBookInfo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblBookInfo.AutoSize = true;
+            lblBookInfo.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblBookInfo.Location = new Point(13, 41);
             lblBookInfo.Name = "lblBookInfo";
-            lblBookInfo.Size = new Size(154, 20);
+            lblBookInfo.Size = new Size(159, 21);
             lblBookInfo.TabIndex = 1;
             lblBookInfo.Text = "Здесь появиться info";
             // 
@@ -348,11 +349,12 @@
             // lstBooks
             // 
             lstBooks.BackColor = SystemColors.Info;
+            lstBooks.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lstBooks.FormattingEnabled = true;
-            lstBooks.ItemHeight = 19;
+            lstBooks.ItemHeight = 21;
             lstBooks.Location = new Point(0, 43);
             lstBooks.Name = "lstBooks";
-            lstBooks.Size = new Size(740, 137);
+            lstBooks.Size = new Size(740, 130);
             lstBooks.TabIndex = 1;
             lstBooks.SelectedIndexChanged += lstBooks_SelectedIndexChanged;
             // 
@@ -534,9 +536,10 @@
             // 
             lblDeliveryInfo.AutoSize = true;
             lblDeliveryInfo.BorderStyle = BorderStyle.FixedSingle;
+            lblDeliveryInfo.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lblDeliveryInfo.Location = new Point(16, 308);
             lblDeliveryInfo.Name = "lblDeliveryInfo";
-            lblDeliveryInfo.Size = new Size(160, 22);
+            lblDeliveryInfo.Size = new Size(198, 27);
             lblDeliveryInfo.TabIndex = 1;
             lblDeliveryInfo.Tag = "";
             lblDeliveryInfo.Text = "Информация о книге";
@@ -545,11 +548,12 @@
             // 
             lstDeliveries.BackColor = SystemColors.Info;
             lstDeliveries.Dock = DockStyle.Top;
+            lstDeliveries.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lstDeliveries.FormattingEnabled = true;
-            lstDeliveries.ItemHeight = 19;
+            lstDeliveries.ItemHeight = 21;
             lstDeliveries.Location = new Point(3, 3);
             lstDeliveries.Name = "lstDeliveries";
-            lstDeliveries.Size = new Size(846, 251);
+            lstDeliveries.Size = new Size(846, 256);
             lstDeliveries.TabIndex = 0;
             lstDeliveries.SelectedIndexChanged += lstDeliveries_SelectedIndexChanged;
             // 
@@ -663,18 +667,19 @@
             lblCustomerRequest.Size = new Size(180, 20);
             lblCustomerRequest.TabIndex = 1;
             lblCustomerRequest.Text = "Требование покупателя:";
-            lstCustomers.SelectedIndexChanged += lstCustomers_SelectedIndexChanged;
             // 
             // lstCustomers
             // 
             lstCustomers.BackColor = SystemColors.Info;
+            lstCustomers.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lstCustomers.FormattingEnabled = true;
-            lstCustomers.ItemHeight = 19;
+            lstCustomers.ItemHeight = 21;
             lstCustomers.Items.AddRange(new object[] { "У Вас пока нет ни одного покупателя" });
             lstCustomers.Location = new Point(3, 3);
             lstCustomers.Name = "lstCustomers";
-            lstCustomers.Size = new Size(400, 555);
+            lstCustomers.Size = new Size(400, 550);
             lstCustomers.TabIndex = 0;
+            lstCustomers.SelectedIndexChanged += lstCustomers_SelectedIndexChanged;
             // 
             // errorProvider1
             // 

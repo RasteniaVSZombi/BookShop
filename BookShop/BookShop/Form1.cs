@@ -12,7 +12,10 @@ using System.Windows.Forms;
 
 namespace BookShop
 {
-
+    /// <summary>
+    /// Форма "Титульный экран"
+    /// Реализует выбор сложности и является начальным экраном
+    /// </summary>
     public partial class TitleScreen : Form
     {
         public GameSettings _gameSettings;
@@ -23,6 +26,9 @@ namespace BookShop
             _gameSettings = new GameSettings();
         }
 
+        /// <summary>
+        /// Функция "красивого" оформления кнопок
+        /// </summary>
         private void StyleButton(Button btn, Color backColor, Color foreColor)
         {
             btn.FlatStyle = FlatStyle.Flat;
@@ -33,6 +39,10 @@ namespace BookShop
             btn.Cursor = Cursors.Hand;
         }
 
+        /// <summary>
+        /// Функция перехода в другую форму (подтверждение сложности)
+        /// </summary>
+        /// <param name="difficulty">выбранная сложность</param>
         private void ShowDifficultyConfirmation(string difficulty)
         {
             DialogResult result = MessageBox.Show(
@@ -53,21 +63,33 @@ namespace BookShop
             }
         }
 
+        /// <summary>
+        /// Кнопка "Легкого" уровня сложности
+        /// </summary>
         private void btnEasy_Click(object sender, EventArgs e)
         {
             ShowDifficultyConfirmation("«Лёгкий»");
         }
 
+        /// <summary>
+        /// Кнопка "Среднего" уровня сложности
+        /// </summary>
         private void btnNormal_Click(object sender, EventArgs e)
         {
             ShowDifficultyConfirmation("«Нормальный»");
         }
 
+        /// <summary>
+        /// Кнопка "Сложного" уровня сложности
+        /// </summary>
         private void btnHard_Click(object sender, EventArgs e)
         {
             ShowDifficultyConfirmation("«Сложный»");
         }
 
+        /// <summary>
+        /// Кнопка "Об Игре"
+        /// </summary>
         private void btnAbout_Click(object sender, EventArgs e)
         {
             MessageBox.Show(

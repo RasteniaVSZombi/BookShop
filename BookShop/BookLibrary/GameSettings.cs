@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BookLibrary
 {
+    /// <summary>
+    /// Класс хранения игровых настроек
+    /// </summary>
     public class GameSettings
     {
         // Основные параметры игры
@@ -29,13 +32,17 @@ namespace BookLibrary
         public int Bonus3 { get; set; }  // за опечатку
         public int Penalty { get; set; }
 
-        // Конструктор по умолчанию с начальными значениями
+        /// <summary>
+        /// Конструктор по умолчанию с начальными значениями
+        /// </summary>
         public GameSettings()
         {
             ResetToDefault();
         }
 
-        // Метод сброса настроек к значениям по умолчанию
+        /// <summary>
+        /// Метод сброса настроек к значениям по умолчанию
+        /// </summary>
         public void ResetToDefault()
         {
             Difficulty = "Нормальный";
@@ -53,7 +60,10 @@ namespace BookLibrary
             Penalty = 15;
         }
 
-        // Метод установки параметров в зависимости от сложности
+        /// <summary>
+        /// Метод установки параметров в зависимости от сложности
+        /// </summary>
+        /// <param name="difficulty">выбранная сложность</param>
         public void SetDifficulty(string difficulty)
         {
             switch (difficulty)
@@ -66,7 +76,7 @@ namespace BookLibrary
                     CustomerTime = 25;
                     MaxUnhappyCustomers = 5;
                     MaxQueueSize = 7;
-                    GameDayTime = 200;
+                    GameDayTime = 2;
                     Bonus1 = 12;
                     Bonus2 = 18;
                     Bonus3 = 15;
@@ -82,7 +92,7 @@ namespace BookLibrary
                     StartBalance = 800;
                     OrderDeliveryTime = 8;
                     RandomBookTime = 12;
-                    CustomerTime = 15;
+                    CustomerTime = 1;
                     MaxUnhappyCustomers = 2;
                     MaxQueueSize = 3;
                     GameDayTime = 400;
